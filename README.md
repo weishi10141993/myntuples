@@ -14,7 +14,7 @@ setup dunetpc v09_22_02 -q e19:debug
 setup_fnal_security
 
 mrb newDev
-source /dune/app/users/${USERNAME}/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
+source /dune/app/users/<your_username>/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
 #for example: source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
 
 cd srcs
@@ -32,7 +32,7 @@ To run on FD MC files, this produces a ROOT nTuple:
 ```
 cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 #for example: cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
-lar -c MyEnergyAnalysis.fcl /dune/app/users/weishi/inputs/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root -T /dune/app/users/weishi/inputs/myhistogram.root
+lar -c MyEnergyAnalysis.fcl -s /dune/app/users/weishi/inputs/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root -T /dune/app/users/weishi/inputs/myhistogram.root
 ```
 
 The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set up:
@@ -41,9 +41,10 @@ The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_22_02 -q e19:debug
 setup_fnal_security
-source /dune/app/users/${USERNAME}/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
+source /dune/app/users/<your_username>/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
 #for example: source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
 mrbsetenv
+cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
 
 If changed ```MyEnergyAnalysis_module.cc```, recompile the code:
