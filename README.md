@@ -68,15 +68,21 @@ Fyi, a good instruction on writing a [LArSoft module](https://cdcvs.fnal.gov/red
 
 ## File access
 From DUNE FNAL machines:
-FD MC files: [FD Beamsim Requests](https://dune-data.fnal.gov/mc/mcc11/index.html)
-FD CAFs (no energy deposit details): ```/pnfs/dune/persistent/users/LBL_TDR/CAFs/v4/FD*```
-ND CAFs: ```/pnfs/dune/persistent/users/marshalc/nd_offaxis/v7/CAF```
+
+    FD MC files: [FD Beamsim Requests](https://dune-data.fnal.gov/mc/mcc11/index.html)
+
+    FD CAFs (no energy deposit details): ```/pnfs/dune/persistent/users/LBL_TDR/CAFs/v4/FD*```
+
+    ND CAFs: ```/pnfs/dune/persistent/users/marshalc/nd_offaxis/v7/CAF```
 
 From NN group machine:
-FD MC files: ```/storage/shared/cvilela/DUNE_FD_MC```
-On-axis ND CAFs to calculate the geometric efficiency correction for ND events: ```/storage/shared/cvilela/CAF/ND_v7```
+
+    FD MC files: ```/storage/shared/cvilela/DUNE_FD_MC```
+
+    On-axis ND CAFs to calculate the geometric efficiency correction for ND events: ```/storage/shared/cvilela/CAF/ND_v7```
 
 ## ND Geometry Efficiency
 
 For reference, the ND analysis uses [these](https://github.com/DUNE/ND_CAFMaker) to produce CAF files (ntuples).
-The ```dumptree.py``` file uses functions in this [repo](https://github.com/cvilelahep/DUNE_ND_GeoEff)
+
+The ```dumptree.py``` file uses functions in this [repo](https://github.com/cvilelahep/DUNE_ND_GeoEff).
