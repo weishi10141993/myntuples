@@ -71,21 +71,8 @@ namespace lar {
     // -----------------------------------------------
     // class definition
     /**
-     * This class extracts information from the generated and reconstructed
-     * particles.
-     *
-     * It produces histograms for the simulated particles in the input file:
-     * - PDG ID (flavor) of all particles
-     * - momentum of the primary particles selected to have a specific PDG ID
-     * - length of the selected particle trajectory
-     *
-     * It also produces two ROOT trees.
-     *
-     * The first ROOT tree contains information on the simulated
-     * particles, including "dEdx", a binned histogram of collected
-     * charge as function of track range.
-     *
-     * The second ROOT tree contains information on the reconstructed hits.
+     * This class produces a ROOT tree that contains information
+     * from the generated/simulated and reconstructed particles.
      *
      * Configuration parameters
      * =========================
@@ -109,9 +96,8 @@ namespace lar {
     class MyEnergyAnalysis : public art::EDAnalyzer {
     public:
 
-      // This structure describes the configuration parameters of the
-      // module.  Any missing or unknown parameters will generate a
-      // configuration error.
+      // This structure describes the configuration parameters of the module.
+      // Any missing or unknown parameters will generate a configuration error.
 
       struct Config {
 
@@ -169,40 +155,46 @@ namespace lar {
       int fSelectedPDG;                       // PDG code of particle we'll focus on
       double fBinSize;                        // For dE/dx work: the value of dx.
 
-      // Pointers to the histograms we'll create.
-      TH1D* fPDGCodeHist;     // PDG code of all particles
-      TH1D* fMomentumHist;    // momentum [GeV] of all selected particles
-      TH1D* fTrackLengthHist; // true length [cm] of all selected particles
+      // The n-tuple we'll create.
+      TTree* fNtuple;
 
-      // The n-tuples we'll create.
-      TTree* fSimulationNtuple;     // tuple with simulated data
-      TTree* fReconstructionNtuple; // tuple with reconstructed data
-
-      // The variables that will go into both n-tuples.
+      // Event info
       int fEvent;  // number of the event being processed
       int fRun;    // number of the run being processed
       int fSubRun; // number of the sub-run being processed
 
-      // The variables that will go into the simulation n-tuple.
-      int fSimPDG;          // PDG ID of the particle being processed
-      int fSimTrackID;      // GEANT ID of the particle being processed
-      double fStartXYZT[4]; // (x,y,z,t) of the true start of the particle
-      double fEndXYZT[4];   // (x,y,z,t) of the true end of the particle
-      double fStartPE[4];   // (Px,Py,Pz,E) at the true start of the particle
-      double fEndPE[4];     // (Px,Py,Pz,E) at the true end of the particle
-      int fSimNdEdxBins;    // Number of dE/dx bins in a given sim track.
-      std::vector<double> fSimdEdxBins; // The vector that will be used to accumulate sim dE/dx values as a function of range
+      // Variables related to simulation
+      int fSimPDG;                       // MCParticle PDG ID
+      int fSimTrackID;                   // GEANT ID of the particle being processed
+      double fSim_mu_start_vx;           // x position of the muon trajectory start
+      double fSim_mu_start_vy;           // y .....................................
+      double fSim_mu_start_vz;           // z .....................................
+      double fSim_mu_end_vx;             // x position of the muon trajectory end
+      double fSim_mu_end_vy;             // y ...................................
+      double fSim_mu_end_vz;             // z ...................................
+      double fSim_mu_start_px;           // x momentum of the muon trajectory start
+      double fSim_mu_start_py;           // y .....................................
+      double fSim_mu_start_pz;           // z .....................................
+      double fSim_mu_end_px;             // x momentum of the muon trajectory end
+      double fSim_mu_end_py;             // y ...................................
+      double fSim_mu_end_pz;             // z ...................................
+      double fSim_mu_start_4position[4]; // (x,y,z,t) of the muon trajectory start
+      double fSim_mu_end_4position[4];   // ................................ end
+      double fSim_mu_start_4mommenta[4]; // (Px,Py,Pz,E) of the muon trajectory start
+      double fSim_mu_end_4mommenta[4];   // ................................... end
+      double fSim_mu_track_length;       // muon track length
+      std::vector<double> fSimdEdxBins;  // The vector that will be used to accumulate sim dE/dx values as a function of range
 
-      // Variables used in the reconstruction n-tuple
-      int fRecoPDG;       // PDG ID of the particle being processed
-      int fRecoTrackID;   // GEANT ID of the particle being processed
-      int fRecoNdEdxBins; // Number of dE/dx bins in a given reco track.
+      // Variables related to reconstruction
+      int fRecoPDG;                      // PDG ID of the particle being processed
+      int fRecoTrackID;                  // GEANT ID of the particle being processed
+      int fRecoNdEdxBins;                // Number of dE/dx bins in a given reco track.
       std::vector<double> fRecodEdxBins; // The vector that will be used to accumulate reco dE/dx values as a function of range.
 
       // Other variables that will be shared between different methods.
       geo::GeometryCore const* fGeometryService; // pointer to Geometry provider
       double fElectronsToGeV;                    // conversion factor for no. of ionization electrons to energy deposited in GeV
-      int fTriggerOffset; // (units of ticks) time of expected neutrino event
+      int fTriggerOffset;                        // (units of ticks) time of expected neutrino event
 
     }; // class MyEnergyAnalysis
 
@@ -242,46 +234,47 @@ namespace lar {
     //-----------------------------------------------------------------------
     void MyEnergyAnalysis::beginJob()
     {
-      // Get the detector length to determine the max bin edge of fTrackLengthHist
+      // Get the detector length
       const double detectorLength = DetectorDiagonal(*fGeometryService);
+      std::cout << "Detector length=" << detectorLength << " cm" << std::endl;
 
       // Access art's TFileService, which will handle creating and writing
       // histograms and n-tuples for us.
       art::ServiceHandle<art::TFileService const> tfs;
 
-      // Define the histograms.
-      fPDGCodeHist     = tfs->make<TH1D>("pdgcodes", ";PDG Code;",                   5000, -2500, 2500);
-      fMomentumHist    = tfs->make<TH1D>("momstart", ";p (GeV);",                    100, 0., 10.);
-      fTrackLengthHist = tfs->make<TH1D>("length",   ";particle track length (cm);", 200, 0, detectorLength);
-
       // Define n-tuples
-      fSimulationNtuple     = tfs->make<TTree>("MyEnergyAnalysisSimulation",     "MyEnergyAnalysisSimulation");
-      fReconstructionNtuple = tfs->make<TTree>("MyEnergyAnalysisReconstruction", "MyEnergyAnalysisReconstruction");
+      fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      // Define the branches of simulation n-tuple.
-      fSimulationNtuple->Branch("Event",     &fEvent,        "Event/I");
-      fSimulationNtuple->Branch("SubRun",    &fSubRun,       "SubRun/I");
-      fSimulationNtuple->Branch("Run",       &fRun,          "Run/I");
-      fSimulationNtuple->Branch("TrackID",   &fSimTrackID,   "TrackID/I");
-      fSimulationNtuple->Branch("PDG",       &fSimPDG,       "PDG/I");
+      fNtuple->Branch("Event",                 &fEvent,                  "Event/I");
+      fNtuple->Branch("SubRun",                &fSubRun,                 "SubRun/I");
+      fNtuple->Branch("Run",                   &fRun,                    "Run/I");
+      // Simulation branches Sim*
+      // muon position
+      fNtuple->Branch("Sim_mu_start_vx",       &fSim_mu_start_vx,        "Sim_mu_start_vx/D");
+      fNtuple->Branch("Sim_mu_start_vy",       &fSim_mu_start_vy,        "Sim_mu_start_vy/D");
+      fNtuple->Branch("Sim_mu_start_vz",       &fSim_mu_start_vz,        "Sim_mu_start_vz/D");
+      fNtuple->Branch("Sim_mu_end_vx",         &fSim_mu_end_vx,          "Sim_mu_end_vx/D");
+      fNtuple->Branch("Sim_mu_end_vy",         &fSim_mu_end_vy,          "Sim_mu_end_vy/D");
+      fNtuple->Branch("Sim_mu_end_vz",         &fSim_mu_end_vz,          "Sim_mu_end_vz/D");
+      // muon momentum
+      fNtuple->Branch("Sim_mu_start_px",       &fSim_mu_start_px,        "Sim_mu_start_px/D");
+      fNtuple->Branch("Sim_mu_start_py",       &fSim_mu_start_py,        "Sim_mu_start_py/D");
+      fNtuple->Branch("Sim_mu_start_pz",       &fSim_mu_start_pz,        "Sim_mu_start_pz/D");
+      fNtuple->Branch("Sim_mu_end_px",         &fSim_mu_end_px,          "Sim_mu_end_px/D");
+      fNtuple->Branch("Sim_mu_end_py",         &fSim_mu_end_py,          "Sim_mu_end_py/D");
+      fNtuple->Branch("Sim_mu_end_pz",         &fSim_mu_end_pz,          "Sim_mu_end_pz/D");
       // Write arrays giving the address of the array: simply the array name.
-      fSimulationNtuple->Branch("StartXYZT", fStartXYZT,     "StartXYZT[4]/D");
-      fSimulationNtuple->Branch("EndXYZT",   fEndXYZT,       "EndXYZT[4]/D");
-      fSimulationNtuple->Branch("StartPE",   fStartPE,       "StartPE[4]/D");
-      fSimulationNtuple->Branch("EndPE",     fEndPE,         "EndPE[4]/D");
-      // For a variable-length array: include the number of bins.
-      fSimulationNtuple->Branch("NdEdx",     &fSimNdEdxBins, "NdEdx/I");
+      fNtuple->Branch("Sim_mu_start_4position", fSim_mu_start_4position, "Sim_mu_start_4position[4]/D");
+      fNtuple->Branch("Sim_mu_end_4position",   fSim_mu_end_4position,   "Sim_mu_end_4position[4]/D");
+      fNtuple->Branch("Sim_mu_start_4mommenta", fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
+      fNtuple->Branch("Sim_mu_end_4mommenta",   fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_mu_track_length",   &fSim_mu_track_length,    "Sim_mu_track_length/D");
       // ROOT branches can contain std::vector objects.
-      fSimulationNtuple->Branch("dEdx",      &fSimdEdxBins);
+      fNtuple->Branch("dEdx",                  &fSimdEdxBins);
 
-      // A similar definition for the reconstruction n-tuple.
-      fReconstructionNtuple->Branch("Event",   &fEvent,         "Event/I");
-      fReconstructionNtuple->Branch("SubRun",  &fSubRun,        "SubRun/I");
-      fReconstructionNtuple->Branch("Run",     &fRun,           "Run/I");
-      fReconstructionNtuple->Branch("TrackID", &fRecoTrackID,   "TrackID/I");
-      fReconstructionNtuple->Branch("PDG",     &fRecoPDG,       "PDG/I");
-      fReconstructionNtuple->Branch("NdEdx",   &fRecoNdEdxBins, "NdEdx/I");
-      fReconstructionNtuple->Branch("dEdx",    &fRecodEdxBins);
+      // Reconstruction branches
+      fNtuple->Branch("NdEdx",                 &fRecoNdEdxBins,          "NdEdx/I");
+      fNtuple->Branch("dEdx",                  &fRecodEdxBins);
     }
 
     //-----------------------------------------------------------------------
@@ -308,23 +301,13 @@ namespace lar {
 
       // Then fill the vector with all the objects
       if (!event.getByLabel(fSimulationProducerLabel, particleHandle)) {
-
         // If no MCParticles in an event, throw an exception to force this module to stop.
-        throw cet::exception("MyEnergyAnalysis")
-          << " No simb::MCParticle objects in this event - "
-          << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
+        throw cet::exception("MyEnergyAnalysis") << " No simb::MCParticle objects in this event - " << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
       }
 
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
-      //
-      // Here use a different method to access objects:
-      // art::ValidHandle.
       auto simChannelHandle = event.getValidHandle<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
-
-      //
-      // Simulation n-tuple
-      //
 
       // Create a map pf MCParticle to its track ID
       std::map<int, const simb::MCParticle*> particleMap;
@@ -338,13 +321,9 @@ namespace lar {
         // Add the address of the MCParticle to the map, with the track ID as the key.
         particleMap[fSimTrackID] = &particle;
 
-        // Histogram the PDG code of every particle in the event.
+        // Only for primary particles in the event whose PDG codes match a value supplied in the .fcl file
         fSimPDG = particle.PdgCode();
-        fPDGCodeHist->Fill(fSimPDG);
-
-        // fill the n-tuples and histograms only for primary particles in the
-        // event, whose PDG codes match a value supplied in the .fcl file.
-        if (particle.Process() != "primary" || fSimPDG != fSelectedPDG) continue;
+        if (particle.Process() != "primary" || abs(fSimPDG) != fSelectedPDG) continue;
 
         // A particle has a trajectory, consisting of a set of 4-positions and 4-mommenta.
         const size_t numberTrajectoryPoints = particle.NumberTrajectoryPoints();
@@ -356,29 +335,32 @@ namespace lar {
         const TLorentzVector& momentumStart = particle.Momentum(0);
         const TLorentzVector& momentumEnd = particle.Momentum(last);
 
-        // Make a histogram of the starting momentum.
-        fMomentumHist->Fill(momentumStart.P());
+        // Fill position and momentum components.
+        fSim_mu_start_vx = particle.Vx(0);
+        fSim_mu_start_vy = particle.Vy(0);
+        fSim_mu_start_vz = particle.Vz(0);
+        fSim_mu_end_vx = particle.Vx(last);
+        fSim_mu_end_vy = particle.Vy(last);
+        fSim_mu_end_vz = particle.Vz(last);
+        fSim_mu_start_px = particle.Px(0);
+        fSim_mu_start_py = particle.Py(0);
+        fSim_mu_start_pz = particle.Pz(0);
+        fSim_mu_end_px = particle.Px(last);
+        fSim_mu_end_py = particle.Py(last);
+        fSim_mu_end_pz = particle.Pz(last);
 
         // Fill arrays with the 4-values.
-        positionStart.GetXYZT(fStartXYZT);
-        positionEnd.GetXYZT(fEndXYZT);
-        momentumStart.GetXYZT(fStartPE);
-        momentumEnd.GetXYZT(fEndPE);
+        positionStart.GetXYZT(fSim_mu_start_4position);
+        positionEnd.GetXYZT(fSim_mu_end_4position);
+        momentumStart.GetXYZT(fSim_mu_start_4mommenta);
+        momentumEnd.GetXYZT(fSim_mu_end_4mommenta);
 
-        // Get the track length using spherical cooridnate system: assume straight track? time negligible?
+        // Calculate length using spherical cooridnate system: assume straight track? time negligible?
         const double trackLength = (positionEnd - positionStart).Rho();
-        mf::LogInfo("MyEnergyAnalysis") << "Track length: " << trackLength << " cm" << std::endl;
+        fSim_mu_track_length = trackLength;
 
-        // Fill a histogram of the track length.
-        fTrackLengthHist->Fill(trackLength);
+        // std::cout << "track ID=" << fSimTrackID << " (PDG ID: " << fSimPDG << ") " << trackLength << " cm long, momentum " << momentumStart.P() << " GeV/c, has " << numberTrajectoryPoints << " trajectory points" << std::endl;
 
-        mf::LogInfo("MyEnergyAnalysis") << "track ID=" << fSimTrackID << " (PDG ID: " << fSimPDG << ") "
-                                        << trackLength << " cm long, momentum "
-                                        << momentumStart.P() << " GeV/c, has "
-                                        << numberTrajectoryPoints << " trajectory points" << std::endl;
-
-        // Determine the number of dE/dx bins for the n-tuple.
-        fSimNdEdxBins = int(trackLength / fBinSize) + 1;
         // Initialize the vector of dE/dx bins to be empty.
         fSimdEdxBins.clear();
 
@@ -435,15 +417,11 @@ namespace lar {
         }     // end For each SimChannel
 
         // Write TTree
-        fSimulationNtuple->Fill();
+        fNtuple->Fill();
 
       } // end loop over all particles in the event.
 
-      //
-      // Reconstruction n-tuple
-      //
-
-      // Start by reading the Hits. A Hit is a 2D object in a plane:
+      // Reading the reco Hits. A reco Hit is a 2D object in a plane:
       // see ${LARDATAOBJ_INC}/lardataobj/RecoBase/Hit.h
       // We don't use art::ValidHandle here because there might be no hits in the input;
       // e.g., we ran the simulation but not the reconstruction, may as well skip this module.
@@ -463,7 +441,7 @@ namespace lar {
         // We have a hit. For this example let's just focus on the hits in the collection plane.
         if (fGeometryService->SignalType(hitChannelNumber) != geo::kCollection) continue;
 
-        mf::LogInfo("MyEnergyAnalysis") << "Hit in collection plane" << std::endl;
+        // std::cout << "Hit in collection plane" << std::endl;
 
         // In reconstruction, the channel waveforms are truncated. So
         // we have to adjust the Hit TDC ticks to match those of the
@@ -483,7 +461,7 @@ namespace lar {
           auto simChannelNumber = channel.Channel();
           if (simChannelNumber != hitChannelNumber) continue;
 
-          mf::LogInfo("MyEnergyAnalysis") << "Matched channel no.: " << simChannelNumber << std::endl;
+          // std::cout << "Matched channel no.: " << simChannelNumber << std::endl;
 
           // The time slices in this sim channel.
           auto const& timeSlices = channel.TDCIDEMap();
@@ -500,7 +478,7 @@ namespace lar {
 
           // Did we find anything? If not, skip.
           if (startPointer == timeSlices.end() || startPointer == endPointer) continue;
-          mf::LogInfo("MyEnergyAnalysis") << "Time slice start = " << (*startPointer).first << ", end = " << (*endPointer).first  << std::endl;
+          // std::cout << "Time slice start = " << (*startPointer).first << ", end = " << (*endPointer).first  << std::endl;
 
           // Loop over the time slices we found that match the hit times.
           for (auto slicePointer = startPointer; slicePointer != endPointer; slicePointer++) {
@@ -521,7 +499,7 @@ namespace lar {
               const simb::MCParticle& particle = *((*search).second);
 
               // Does it match the user input?
-              if (particle.Process() != "primary" || particle.PdgCode() != fSelectedPDG) continue;
+              if (particle.Process() != "primary" || abs(particle.PdgCode()) != fSelectedPDG) continue;
 
               // Determine the dE/dx of this particle.
               // Question: This is still sim energy deposits? Just that integrated the reco hit time slices?
@@ -563,7 +541,7 @@ namespace lar {
 
         // At this point, we've filled in all the reconstruction
         // n-tuple's variables. Write it.
-        fReconstructionNtuple->Fill();
+        fNtuple->Fill();
       }
 
       // In loops above, what links the information in simb::MCParticle and sim::SimChannel is the
@@ -577,7 +555,7 @@ namespace lar {
       const art::FindManyP<simb::MCTruth> findManyTruth(particleHandle, event, fSimulationProducerLabel);
 
       if (!findManyTruth.isValid()) {
-        mf::LogInfo("MyEnergyAnalysis") << "findManyTruth simb::MCTruth for simb::MCParticle failed!" << std::endl;
+        std::cout << "findManyTruth simb::MCTruth for simb::MCParticle failed!" << std::endl;
       }
 
       size_t particle_index = 0; // only look at first particle in particleHandle's vector.
@@ -585,10 +563,10 @@ namespace lar {
 
       // Make sure there's no problem.
       if (truth.empty()) {
-        mf::LogInfo("MyEnergyAnalysis") << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
+        std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
 
-      mf::LogInfo("MyEnergyAnalysis") << "Sec. particle ID=" << particleHandle->at(particle_index).TrackId() << " <-> primary gen PDG=" << truth[0]->GetParticle(0).PdgCode() << std::endl;
+      // std::cout << "Sec. particle ID=" << particleHandle->at(particle_index).TrackId() << " <-> primary gen PDG=" << truth[0]->GetParticle(0).PdgCode() << std::endl;
 
       // Example to find what hits are associated with clusters.
       art::Handle<std::vector<recob::Cluster>> clusterHandle;
@@ -599,17 +577,18 @@ namespace lar {
       const art::FindManyP<recob::Hit> findManyHits(clusterHandle, event, fClusterProducerLabel);
 
       if (!findManyHits.isValid()) {
-        mf::LogInfo("MyEnergyAnalysis") << "findManyHits recob::Hit for recob::Cluster failed;" << " cluster label='" << fClusterProducerLabel << "'"<< std::endl;
+        std::cout << "findManyHits recob::Hit for recob::Cluster failed;" << " cluster label='" << fClusterProducerLabel << "'"<< std::endl;
       }
 
       // Loop over the clusters to see the hits associated with each one.
+      /*
       for (size_t cluster_index = 0; cluster_index != clusterHandle->size(); cluster_index++) {
 
         auto const& hits = findManyHits.at(cluster_index);
 
         // A vector of pointers to the hits associated with the cluster,
-        mf::LogInfo("MyEnergyAnalysis") << "Cluster ID=" << clusterHandle->at(cluster_index).ID() << " has " << hits.size() << " hits" << std::endl;
-      }
+        std::cout << "Cluster ID=" << clusterHandle->at(cluster_index).ID() << " has " << hits.size() << " hits" << std::endl;
+      }*/
 
     } // MyEnergyAnalysis::analyze()
 

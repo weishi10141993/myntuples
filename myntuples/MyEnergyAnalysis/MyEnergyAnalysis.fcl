@@ -1,16 +1,4 @@
-# A script to run an analysis module: MyEnergyAnalysis. You may want to
-# compare this script with ${LARSIM_DIR}/job/prodsingle.fcl; in
-# particular, in this script there are no output streams because the
-# module doesn't write any events, just histograms or n-tuples.
-
-# See <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/_Running_Jobs_>
-# for more information on the structure of .fcl files.
-
-# Note that the following line loads many more services than we're
-# going to use in this example. If we're clever enough, and we worked
-# through the nested layers of fcl scripts, we could only include
-# those services that we actually use, which would save some time and
-# memory.
+# A script to run an analysis module: MyEnergyAnalysis.
 
 #include "services_dune.fcl"
 
@@ -20,11 +8,9 @@ services:
 {
   # Load the service that manages root files for histograms.
   # Any histograms or n-tuples that you create in the program will be
-  # written to this file. You can override the file name with the -T
-  # option on the command line; e.g.,
-  #  lar -c MyEnergyAnalysis.fcl -T myhistograms.root -s myinput.root
+  # written to this file.
 
-  TFileService:           { fileName: "MyEnergyAnalysis.root" }
+  TFileService:           { fileName: "myntuple.root" }
 
 
 
@@ -38,23 +24,14 @@ services:
 
   # This parameter controls the level of descriptive output from
   # various LArSoft modules. For a list of different message levels,
-  # see ${LARDATA_DIR}/job/messageservice.fcl. For most jobs this is
-  # set to standard_warning; here it is set to standard_info because I
-  # write some LogInfo messages in the analysis module for
-  # demonstration purposes.
-
-  # Note that if you set this to standard_debug (to see the LOG_DEBUG
-  # messages in the analysis module) the job's messages will not
-  # appear on screen. They're written to a debug.log file instead.
+  # see ${LARDATA_DIR}/job/messageservice.fcl.
 
   message:                @local::standard_info
 
 
 
   # This following line defines many default LArSoft resources for
-  # this job. It's more than we'll need, but it's easier to include
-  # all of them than to pick and choose. We want "simulation" services
-  # because the example module accesses LArG4Parameters.
+  # this job.
 
   @table::dunefd_simulation_services
 
@@ -62,22 +39,16 @@ services:
 
 
 # The 'source' section tells the script to expect an input file with art::Event records.
-# Note that the name of the input file is not included here. You specify that on the
-# command line when you run this script; e.g.,
-#    lar -c MyEnergyAnalysis.fcl -s myinput.root
-# The file "myinput.root" is assumed to have been created by a previous LArSoft job.
 
 source:
 {
   module_type: RootInput
 
-  # Number of events to analyze; "-1" means all of the events in the input
-  # file. You can override this value with the "-n" option on the command line.
+  # Number of events to analyze
   maxEvents:  10
 
-  # I've commented this out, but if you want to include the name of
-  # an art::Event input file in a script, here's how you do it.
-  # fileNames: ["myinput.root"]
+  # Include the name of an art::Event input file
+  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/21/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root"]
 }
 
 

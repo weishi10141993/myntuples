@@ -32,7 +32,7 @@ To run on FD MC files, this produces a ROOT nTuple:
 ```
 cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 #for example: cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
-lar -c MyEnergyAnalysis.fcl -s /dune/app/users/weishi/inputs/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root -T /dune/app/users/weishi/inputs/myhistogram.root
+lar -c MyEnergyAnalysis.fcl -n -1
 ```
 
 The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set up:
