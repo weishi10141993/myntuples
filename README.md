@@ -47,7 +47,7 @@ mrbsetenv
 cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
 
-If changed ```MyEnergyAnalysis_module.cc```, recompile the code:
+If changed ```MyEnergyAnalysis_module.cc```, recompile the code (do the setup above first):
 
 ```
 cd ${MRB_BUILDDIR}                        # Go to your build directory
