@@ -1,8 +1,8 @@
 # DUNE FD Geometry Efficiency
 
-## Standalone LArSoft Module for FD Geometry Efficiency
+## Instruction
 
-From DUNE FNAL machines (dunegpvm*):
+[First time] Set up the computing environment from DUNE FNAL machines (dunegpvm*):
 
 ```
 cd /dune/app/users/<your_username>
