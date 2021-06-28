@@ -156,6 +156,7 @@ namespace lar {
       int fSim_nEle;                     // Number of Sim electrons (e+/e-) in the event
       int fSim_nMu;                      // Number of Sim muons (mu+/mu-) in the event
       int fSim_nTau;                     // Number of Sim tau leptons (+/-) in the event
+      int fSim_nPhoton;                  // Number of Sim photons in the event
       int fSim_nPionNeutral;             // Number of Sim pi+/pi- in the event
       int fSim_nPionCharged;             // Number of Sim pi0 in the event
       int fSim_nNeutron;                 // Number of Sim neutrons in the event
@@ -262,6 +263,7 @@ namespace lar {
 
       fNtuple->Branch("Sim_nEle",              &fSim_nEle,                "Sim_nEle/I");
       fNtuple->Branch("Sim_nTau",              &fSim_nTau,                "Sim_nTau/I");
+      fNtuple->Branch("Sim_nPhoton",           &fSim_nPhoton,             "Sim_nPhoton/I");
       fNtuple->Branch("Sim_nPionNeutral",      &fSim_nPionNeutral,        "Sim_nPionNeutral/I");
       fNtuple->Branch("Sim_nPionCharged",      &fSim_nPionCharged,        "Sim_nPionCharged/I");
       fNtuple->Branch("Sim_nNeutron",          &fSim_nNeutron,            "Sim_nNeutron/I");
@@ -314,6 +316,7 @@ namespace lar {
       std::vector<const simb::MCParticle*> SimElectrons;
       std::vector<const simb::MCParticle*> SimMuons;
       std::vector<const simb::MCParticle*> SimTaus;
+      std::vector<const simb::MCParticle*> SimPhotons;
       std::vector<const simb::MCParticle*> SimNeutralPions;
       std::vector<const simb::MCParticle*> SimChargedPions;
       std::vector<const simb::MCParticle*> SimNeutrons;
@@ -334,6 +337,7 @@ namespace lar {
           if ( abs(fSimPDG) == 11 )   SimElectrons.push_back(&particle);
           if ( abs(fSimPDG) == 13 )   SimMuons.push_back(&particle);
           if ( abs(fSimPDG) == 15 )   SimTaus.push_back(&particle);
+          if ( abs(fSimPDG) == 22 )   SimPhotons.push_back(&particle);
           if ( abs(fSimPDG) == 111 )  SimNeutralPions.push_back(&particle);
           if ( abs(fSimPDG) == 211 )  SimChargedPions.push_back(&particle);
           if ( abs(fSimPDG) == 2112 ) SimNeutrons.push_back(&particle);
@@ -345,6 +349,7 @@ namespace lar {
       fSim_nEle         = SimElectrons.size();
       fSim_nMu          = SimMuons.size();
       fSim_nTau         = SimTaus.size();
+      fSim_nPhoton      = SimPhotons.size();
       fSim_nPionNeutral = SimNeutralPions.size();
       fSim_nPionCharged = SimChargedPions.size();
       fSim_nNeutron     = SimNeutrons.size();
@@ -430,6 +435,8 @@ namespace lar {
         // Note: There is more than one plane that reacts to charge in the TPC. We only want to include the
         // energy from the collection plane: geo::kCollection defined in
         // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
+        // Another way to makre sure the plane is correct is go through channel -> wire -> plane ID, and require planeID to be 0. (Sanil's method)
+        // May need to check if two methods give the same energy deposits.
         if (fGeometryService->SignalType(channelNumber) != geo::kCollection) continue;
 
         // Each channel has a map inside it that connects a time slice to energy deposits in the detector.
@@ -450,8 +457,8 @@ namespace lar {
             // "search" points to a pair in the map: <track ID, MCParticle*>
             const simb::MCParticle& particle = *((*search).second);
 
-            // If it's not leptons or photons, we think it's hadronic
-            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 && abs(particle.PdgCode()) != 22 ){
+            // If it's not leptons, we think it's hadronic
+            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 ){
 
               // Note another way to get E deposit is simply energyDeposit.energy
               fSim_hadronic_Edep += energyDeposit.numElectrons * fElectronsToGeV;
