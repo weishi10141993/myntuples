@@ -1,0 +1,125 @@
+# A script to run an analysis module: MyEnergyAnalysis.
+
+#include "services_dune.fcl"
+
+process_name: MyEnergyAnalysis
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  # Any histograms or n-tuples that you create in the program will be
+  # written to this file.
+  TFileService:           { fileName: "myntuple.root" }
+
+
+
+  # This constrols the display in the output of how long each job step
+  # takes for each event. A lot of configuration can be added: details at
+  # https://cdcvs.fnal.gov/redmine/projects/art/wiki/TimeTracker#TimeTracker
+  TimeTracker:            {}
+
+
+
+  # This parameter controls the level of descriptive output from
+  # various LArSoft modules. For a list of different message levels,
+  # see ${LARDATA_DIR}/job/messageservice.fcl.
+  message:                @local::standard_info
+
+
+
+  # This following line defines many default LArSoft resources for
+  # this job.
+  @table::dunefd_simulation_services
+
+}
+
+
+# The 'source' section tells the script to expect an input file with art::Event records.
+
+source:
+{
+  module_type: RootInput
+
+  # Number of events to analyze
+  maxEvents:  10
+
+  # Include the name of an art::Event input file
+  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/21/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/31/11/nu_dune10kt_1x2x6_13009312_0_20181104T221530_gen_g4_detsim_reco.root"]
+}
+
+
+
+# This is empty, because we're not writing an output file with
+# art::Event objects.
+outputs:{}
+
+
+
+# The 'physics' section defines and configures some modules to do work
+# on each event.  First modules are defined; they are scheduled
+# later. Modules are grouped by type.
+
+physics:
+{
+  # Define the variables we'll need to read for this analysis program.
+
+  analyzers:
+  {
+
+    # This name defines a job step below, and will appear as a directory
+    # in the output histogram file.
+
+    MyEnergyAnalysis:
+    {
+      # The "module_type" tells us which module to run. The name here
+      # must match the name supplied to DEFINE_ART_MODULE near the end
+      # of MyEnergyAnalysis_module.cc.
+      module_type:     "MyEnergyAnalysis"
+
+
+      # The input parameters for our MyEnergyAnalysis module. Compare
+      # the names you see here with the "struct Config" in
+      # MyEnergyAnalysis_module.cxx. You will want to add/remove/rename
+      # the example parameters below to suit your task.
+      SimulationLabel: "largeant"
+
+
+      # Hits can be created by more than one module in
+      # ${LARRECO_DIR}/source/larreco/HitFinder. For this example, I
+      # picked the one that's usually run first.
+      HitLabel:        "gaushit"
+
+
+      # The same for clusters:
+      ClusterLabel:    "trajcluster"
+
+
+      # In this example, which primary particle(s) we'll focus on in an event.
+      # PDG code 13 = mu-.
+      # PDGcode:          13
+
+
+      # dx used for the dE/dx calculation; units are cm.
+      # BinSize:          0.3
+    }
+  }
+
+
+
+  # Schedule job step(s) for execution by defining the analysis module
+  # for this job. An 'analysis' module (as opposed to a 'producer' or
+  # a 'filter') does not alter the contents of events in the input
+  # file, nor does it create any events as output. Any step names
+  # listed here must match a name in the 'analyzers' section above.
+  analysis: [ MyEnergyAnalysis ]
+
+
+
+  # "end_paths" is a keyword and contains the modules that do not modify the art::Event;
+  # i.e., analyzers and output streams.
+  end_paths: [ analysis ]
+}
+
+#services.Geometry: @local::dune10kt_1x2x6_v2_geo
+services.Geometry.GDML: "dune10kt_v2_1x2x6.gdml"

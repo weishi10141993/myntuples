@@ -76,9 +76,7 @@ cd upstars
 wget https://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts
 chmod +x ./pullProducts
 ./pullProducts ~/ups slf6 dune-v08_62_01 e19-py2 prof                                    # Scientific Linux 6
-# wget https://scisoft.fnal.gov/scisoft/bundles/tools/checkPrerequisites
-# chmod +x ./checkPrerequisites
-# ./checkPrerequisites
+# I've done the above, start from settings below
 
 # Set up your work directory
 mkdir ~/FDEff                                                                            # First time only
@@ -105,7 +103,16 @@ mrbsetenv                                                                       
 mrb install   
 ```
 
-Next time you login, do:
+To run on FD MC files, this produces a TTree in myntuple.root in your work area:
+
+```
+cd /home/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
+# For example: cd /home/wshi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
+lar -c MyEnergyAnalysis_ivy.fcl -n 10 -s /storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422341_0_20181123T225730_gen_g4_detsim_reco.root
+```
+
+The next time you login the ivy machine (username@ivy.physics.sunysb.edu), do the following to set up:
+
 ```
 source /home/wshi/ups/setup
 setup mrb
@@ -113,7 +120,9 @@ setup dunetpc v08_62_01 -q e19:py2:prof
 source /home/wshi/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
 mrbsetenv
 
-# Go to your work directory
+# Go to your work directory and run your study!
+cd /home/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
+# For example: cd /home/wshi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
 
 ## Notes/tips for NN group machine (ivy) DUNE users:
