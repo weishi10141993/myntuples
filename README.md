@@ -66,19 +66,28 @@ git push
 
 ## Instruction for environment setup from NN group machine: ivy.physics.sunysb.edu (CentOS 6.10)
 
-I've manually installed a DUNE software release on the ivy.physics.sunysb.edu (CentOS 6.10) machine, so you can skip to: # Set up your work directory.
+I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up your work directory](#set-up-your-work-directory).
 
 ```
-# I've done this part and installed a local release on ivy, so you can skip to: # Set up your work directory
+#
+# I've done this part, so you can skip it
+#
 mkdir ~/ups
 mkdir ~/upstars
 cd upstars
 wget https://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts
 chmod +x ./pullProducts
 ./pullProducts ~/ups slf6 dune-v08_62_01 e19-py2 prof                                    # Scientific Linux 6
+#
 # I've done the above, start from settings below
+#
+```
 
-# Set up your work directory
+### Set up your work directory
+
+[First time only]
+
+```
 mkdir ~/FDEff                                                                            # First time only
 cd ~/FDEff
 source /home/wshi/ups/setup      
