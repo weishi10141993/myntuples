@@ -59,9 +59,6 @@ namespace {
   // Sort MC particles based on its start momentum P(0)
   bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
 
-  // Comparison routine for using std::lower/upper_bound to search TDCIDE vectors.
-  //bool TDCIDETimeCompare(const sim::TDCIDE&, const sim::TDCIDE&);
-
 } // local namespace
 
 // An outside package call this module like lar::example::MyEnergyAnalysis
@@ -150,7 +147,9 @@ namespace lar {
       int fRun;    // number of the run being processed
       int fSubRun; // number of the sub-run being processed
 
+      //
       // Variables related to simulation
+      //
       int fSimPDG;                       // MCParticle PDG ID
       int fSimTrackID;                   // GEANT ID of the particle being processed
       int fSim_nEle;                     // Number of Sim electrons (e+/e-) in the event
@@ -178,16 +177,20 @@ namespace lar {
       double fSim_mu_start_4mommenta[4]; // (Px,Py,Pz,E) of the muon trajectory start
       double fSim_mu_end_4mommenta[4];   // ................................... end
       double fSim_mu_track_length;       // muon track length
-      // Two ways of get E deposit: https://internal.dunescience.org/doxygen/structsim_1_1IDE.html#a34267798028729d3b798c17617faeb28
-      double fSim_hadronic_Edep1;        // hadron deposited energy on collection plane: amount of electrons reaching the readout channel
-      double fSim_hadronic_Edep2;        // hadron deposited energy on collection plane: amount of energy released by ionization (from Geant4 simulation) [MeV]
+      // Two ways (a, b) to access collection plane +
+      // Two ways (1, 2) of get E deposit for sim::IDE
+      // Method a
+      double fSim_hadronic_Edep_a1;      // amount of electrons reaching the readout channel [GeV]
+      double fSim_hadronic_Edep_a2;      // amount of energy released by ionization (from Geant4 simulation) [MeV]
+      // Method b
+      double fSim_hadronic_Edep_b1;
+      double fSim_hadronic_Edep_b2;
 
-      // Variables related to reconstruction
-
+      //
       // Other variables that will be shared between different methods.
+      //
       geo::GeometryCore const* fGeometryService; // pointer to Geometry provider
       double fElectronsToGeV;                    // conversion factor for no. of ionization electrons to energy deposited in GeV
-      //int fTriggerOffset;                        // (units of ticks) time of expected neutrino event
 
     }; // class MyEnergyAnalysis
 
@@ -208,9 +211,6 @@ namespace lar {
     {
       // Get a pointer to the geometry service provider.
       fGeometryService = lar::providerFrom<geo::Geometry>();
-
-      //auto const clock_data = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
-      //fTriggerOffset = trigger_offset(clock_data);
 
       // Tell beforehand all the data the module is going to read ("consumes") or
       // might read ("may_consume").
@@ -261,16 +261,18 @@ namespace lar {
       fNtuple->Branch("Sim_mu_start_4mommenta", fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
       fNtuple->Branch("Sim_mu_end_4mommenta",   fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
       fNtuple->Branch("Sim_mu_track_length",   &fSim_mu_track_length,    "Sim_mu_track_length/D");
-      fNtuple->Branch("Sim_hadronic_Edep1",    &fSim_hadronic_Edep1,     "Sim_hadronic_Edep1/D");
-      fNtuple->Branch("Sim_hadronic_Edep2",    &fSim_hadronic_Edep2,     "Sim_hadronic_Edep2/D");
+      fNtuple->Branch("Sim_hadronic_Edep_a1",  &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
+      fNtuple->Branch("Sim_hadronic_Edep_a2",  &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
+      fNtuple->Branch("Sim_hadronic_Edep_b1",  &fSim_hadronic_Edep_b1,   "Sim_hadronic_Edep_b1/D");
+      fNtuple->Branch("Sim_hadronic_Edep_b2",  &fSim_hadronic_Edep_b2,   "Sim_hadronic_Edep_b2/D");
 
-      fNtuple->Branch("Sim_nEle",              &fSim_nEle,                "Sim_nEle/I");
-      fNtuple->Branch("Sim_nTau",              &fSim_nTau,                "Sim_nTau/I");
-      fNtuple->Branch("Sim_nPhoton",           &fSim_nPhoton,             "Sim_nPhoton/I");
-      fNtuple->Branch("Sim_nPionNeutral",      &fSim_nPionNeutral,        "Sim_nPionNeutral/I");
-      fNtuple->Branch("Sim_nPionCharged",      &fSim_nPionCharged,        "Sim_nPionCharged/I");
-      fNtuple->Branch("Sim_nNeutron",          &fSim_nNeutron,            "Sim_nNeutron/I");
-      fNtuple->Branch("Sim_nProton",           &fSim_nProton,             "Sim_nProton/I");
+      fNtuple->Branch("Sim_nEle",              &fSim_nEle,               "Sim_nEle/I");
+      fNtuple->Branch("Sim_nTau",              &fSim_nTau,               "Sim_nTau/I");
+      fNtuple->Branch("Sim_nPhoton",           &fSim_nPhoton,            "Sim_nPhoton/I");
+      fNtuple->Branch("Sim_nPionNeutral",      &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
+      fNtuple->Branch("Sim_nPionCharged",      &fSim_nPionCharged,       "Sim_nPionCharged/I");
+      fNtuple->Branch("Sim_nNeutron",          &fSim_nNeutron,           "Sim_nNeutron/I");
+      fNtuple->Branch("Sim_nProton",           &fSim_nProton,            "Sim_nProton/I");
 
       // Reconstruction branches
 
@@ -293,6 +295,31 @@ namespace lar {
       fEvent = event.id().event();
       fRun = event.run();
       fSubRun = event.subRun();
+
+      // Initialize
+      fSim_mu_start_vx           = -99.;
+      fSim_mu_start_vy           = -99.;
+      fSim_mu_start_vz           = -99.;
+      fSim_mu_end_vx             = -99.;
+      fSim_mu_end_vy             = -99.;
+      fSim_mu_end_vz             = -99.;
+      fSim_mu_start_px           = -99.;
+      fSim_mu_start_py           = -99.;
+      fSim_mu_start_pz           = -99.;
+      fSim_mu_end_px             = -99.;
+      fSim_mu_end_py             = -99.;
+      fSim_mu_end_pz             = -99.;
+      fSim_mu_track_length       = -99.;
+      fSim_hadronic_Edep_a1      = 0.;
+      fSim_hadronic_Edep_a2      = 0.;
+      fSim_hadronic_Edep_b1      = 0.;
+      fSim_hadronic_Edep_b2      = 0.;
+      for (int i = 0; i < 4; i++) {
+        fSim_mu_start_4position[i] = -99.;
+        fSim_mu_end_4position[i]   = -99.;
+        fSim_mu_start_4mommenta[i] = -99.;
+        fSim_mu_end_4mommenta[i]   = -99.;
+      }
 
       // LArSoft data products: https://larsoft.org/important-concepts-in-larsoft/data-products/
       // Data products relevant for this analyzer:
@@ -372,14 +399,6 @@ namespace lar {
       // If multiple sim muons present in event, sort momentum from high to low
       if ( fSim_nMu > 1 ) std::sort(SimMuons.begin(), SimMuons.end(), MomentumOrderMCParticle);
 
-      // Initialize 4-vectors
-      for (int i = 0; i < 4; i++) {
-        fSim_mu_start_4position[i] = -99.;
-        fSim_mu_end_4position[i]   = -99.;
-        fSim_mu_start_4mommenta[i] = -99.;
-        fSim_mu_end_4mommenta[i]   = -99.;
-      }
-
       // Store info for leading momentum sim muon
       if ( fSim_nMu > 0 ) {
 
@@ -396,7 +415,7 @@ namespace lar {
         const TLorentzVector& momentumEnd = leadingmu.Momentum(last);
 
         // Fill position and momentum components
-        fSim_mu_start_vx = leadingmu.Vx(0);
+        fSim_mu_start_vx = leadingmu.Vx(0); // unit?
         fSim_mu_start_vy = leadingmu.Vy(0);
         fSim_mu_start_vz = leadingmu.Vz(0);
         fSim_mu_end_vx = leadingmu.Vx(last);
@@ -419,21 +438,6 @@ namespace lar {
         const double trackLength = (positionEnd - positionStart).Rho();
         fSim_mu_track_length = trackLength;
       }
-      else {
-        fSim_mu_start_vx           = -99.;
-        fSim_mu_start_vy           = -99.;
-        fSim_mu_start_vz           = -99.;
-        fSim_mu_end_vx             = -99.;
-        fSim_mu_end_vy             = -99.;
-        fSim_mu_end_vz             = -99.;
-        fSim_mu_start_px           = -99.;
-        fSim_mu_start_py           = -99.;
-        fSim_mu_start_pz           = -99.;
-        fSim_mu_end_px             = -99.;
-        fSim_mu_end_py             = -99.;
-        fSim_mu_end_pz             = -99.;
-        fSim_mu_track_length       = -99.;
-      }
 
       //
       // Calculate sim hadronic deposit energy
@@ -446,130 +450,53 @@ namespace lar {
         // See methods at https://internal.dunescience.org/doxygen/SimChannel_8h_source.html
         auto const channelNumber = channel.Channel();
 
-        // Note: There is more than one plane that reacts to charge in the TPC. We only want to include the
-        // energy from the collection plane: geo::kCollection defined in
-        // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
-        // Another way to makre sure the plane is correct is go through channel -> wire -> plane ID, and require planeID to be 0. (Sanil's method)
-        // May need to check if two methods give the same energy deposits.
-        if (fGeometryService->SignalType(channelNumber) != geo::kCollection) continue;
-
         // Each channel has a map inside it that connects a time slice to energy deposits in the detector.
         // The full type of this map is std::map<unsigned short, std::vector<sim::IDE>>; we'll use "auto" here
         auto const& timeSlices = channel.TDCIDEMap();
-
-        for (auto const& timeSlice : timeSlices) {
+        for ( auto const& timeSlice : timeSlices ) {
 
           // For the timeSlices map, the 'first' is a time slice number; The 'second' is a vector of IDE objects.
           auto const& energyDeposits = timeSlice.second;
 
           // An "energy deposit" object stores how much charge/energy was deposited in a small volume, by which particle, and where.
           // The type of 'energyDeposit' will be sim::IDE, here use auto.
-          for (auto const& energyDeposit : energyDeposits) {
+          for ( auto const& energyDeposit : energyDeposits ) {
 
             auto search = particleMap.find( energyDeposit.trackID );
             if ( search == particleMap.end() ) continue;
+
             // "search" points to a pair in the map: <track ID, MCParticle*>
             const simb::MCParticle& particle = *((*search).second);
 
-            // If it's not leptons, we think it's hadronic
-            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 ){
+            // If it's not from primary leptons, count it as hadronic
+            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 ) {
+              //
+              // Note: There is more than one plane that reacts to charge in the TPC.
+              //
 
-              fSim_hadronic_Edep1 += energyDeposit.numElectrons * fElectronsToGeV;
-              fSim_hadronic_Edep2 += energyDeposit.energy;
+              // Method a: only include the energy from the collection plane: geo::kCollection defined in
+              // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
+              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection ) {
+
+                // Note: there are also two ways to get E deposit for sim::IDE
+                fSim_hadronic_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
+                fSim_hadronic_Edep_a2 += energyDeposit.energy;
+              } // end if access plane info via channel signal type
+
+              // Method b: navigate via channel -> wire -> plane ID, and require planeID to be 0.
+              std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
+              if( Wires[0].planeID().Plane == 0 ) {
+                fSim_hadronic_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
+                fSim_hadronic_Edep_b2 += energyDeposit.energy;
+              } // end if access plane info via channel -> wire -> plane ID is 0
 
               // Get the (x,y,z) of the energy deposit.
               // TVector3 location(energyDeposit.x, energyDeposit.y, energyDeposit.z);
 
-              // Do we need hadroic E depisit position? weighted?
-
             } // end if hadronic
-
           }   // end For each energy deposit
         }     // end For each time slice
       }       // end For each SimChannel
-
-      //
-      // Example code to access reco Hits.
-      //
-      // See ${LARDATAOBJ_INC}/lardataobj/RecoBase/Hit.h
-      /*
-      art::Handle<std::vector<recob::Hit>> hitHandle;
-      if (!event.getByLabel(fHitProducerLabel, hitHandle)) return;
-
-      auto const clock_data = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(event);
-
-      for (auto const& hit : (*hitHandle)) {
-
-        // The channel associated with this hit.
-        auto hitChannelNumber = hit.Channel();
-
-        // We have a hit. For this example let's just focus on the hits in the collection plane.
-        if (fGeometryService->SignalType(hitChannelNumber) != geo::kCollection) continue;
-
-        // std::cout << "Hit in collection plane" << std::endl;
-
-        // In reconstruction, the channel waveforms are truncated. So
-        // we have to adjust the Hit TDC ticks to match those of the
-        // SimChannels, which were created during simulation.
-        typedef sim::SimChannel::StoredTDC_t TDC_t;
-        TDC_t start_tdc = clock_data.TPCTick2TDC(hit.StartTick());
-        TDC_t end_tdc = clock_data.TPCTick2TDC(hit.EndTick());
-        TDC_t hitStart_tdc = clock_data.TPCTick2TDC(hit.PeakTime() - 3. * hit.SigmaPeakTime());
-        TDC_t hitEnd_tdc = clock_data.TPCTick2TDC(hit.PeakTime() + 3. * hit.SigmaPeakTime());
-
-        start_tdc = std::max(start_tdc, hitStart_tdc);
-        end_tdc = std::min(end_tdc, hitEnd_tdc);
-
-        // Search the SimChannels for matching channel number, then look
-        // at the tracks inside the channel.
-        for (auto const& channel : (*simChannelHandle)) {
-          auto simChannelNumber = channel.Channel();
-          if (simChannelNumber != hitChannelNumber) continue;
-
-          // std::cout << "Matched channel no.: " << simChannelNumber << std::endl;
-
-          // The time slices in this sim channel.
-          auto const& timeSlices = channel.TDCIDEMap();
-
-          // Find the range of time slices in the sim channel that correspond to the range of hit times.
-          sim::TDCIDE startTime;
-          sim::TDCIDE endTime;
-          startTime.first = start_tdc;
-          endTime.first = end_tdc;
-          // Find a pointer to the first time slice with time >= start_tdc.
-          auto const startPointer = std::lower_bound(timeSlices.begin(), timeSlices.end(), startTime, TDCIDETimeCompare);
-          // Find the last time slice with time < end_tdc.
-          auto const endPointer = std::upper_bound(startPointer, timeSlices.end(), endTime, TDCIDETimeCompare);
-
-          // Did we find anything? If not, skip.
-          if (startPointer == timeSlices.end() || startPointer == endPointer) continue;
-          // std::cout << "Time slice start = " << (*startPointer).first << ", end = " << (*endPointer).first  << std::endl;
-
-          // Loop over the time slices we found that match the hit times.
-          for (auto slicePointer = startPointer; slicePointer != endPointer; slicePointer++) {
-            auto const timeSlice = *slicePointer;
-
-            // Loop over the energy deposits from sim channel.
-            auto const& energyDeposits = timeSlice.second;
-            for (auto const& energyDeposit : energyDeposits) {
-
-              // Search the map for the track ID associated with this energy deposit.
-              auto search = particleMap.find(energyDeposit.trackID);
-
-              // Did we find this track ID in the particle map?
-              if (search == particleMap.end()) continue;
-
-              // "search" points to a pair in the map: <track ID, MCParticle*>
-              const simb::MCParticle& particle = *((*search).second);
-
-              // muon
-              if ( particle.Process() != "primary" || abs(particle.PdgCode()) != 13 ) continue;
-
-            } // loop over energy deposits
-          }   // loop over time slices
-        }     // for each SimChannel
-      }       // for each Hit
-      */
 
       // In general, objects in the LArSoft reconstruction chain are linked using the art::Assns class:
       // <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Using_art_in_LArSoft#artAssns>
@@ -638,10 +565,5 @@ namespace {
   bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
     return ( p1->P(0) > p2->P(0) );
   }
-
-  /*bool TDCIDETimeCompare(const sim::TDCIDE& lhs, const sim::TDCIDE& rhs)
-  {
-    return lhs.first < rhs.first;
-  }*/
 
 } // local namespace
