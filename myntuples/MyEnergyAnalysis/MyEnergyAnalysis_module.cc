@@ -180,11 +180,23 @@ namespace lar {
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
-      double fSim_hadronic_Edep_a1;      // amount of electrons reaching the readout channel [GeV]
-      double fSim_hadronic_Edep_a2;      // amount of energy released by ionization (from Geant4 simulation) [MeV]
+      double fSim_hadronic_Edep_a1;      // total amount of electrons reaching the readout channel [GeV]
+      double fSim_hadronic_Edep_a2;      // total amount of energy released by ionizations in the event (from Geant4 simulation) [MeV]
+      int fSim_n_hadronic_Edep_a;        // Number of hadronic energy deposits
+      std::vector<float> fSim_hadronic_hit_x_a;      // Store position x for each energy deposit
+      std::vector<float> fSim_hadronic_hit_y_a;
+      std::vector<float> fSim_hadronic_hit_z_a;
+      std::vector<float> fSim_hadronic_hit_Edep_a1;
+      std::vector<float> fSim_hadronic_hit_Edep_a2;
       // Method b
       double fSim_hadronic_Edep_b1;
       double fSim_hadronic_Edep_b2;
+      int fSim_n_hadronic_Edep_b;        // Number of hadronic energy deposits
+      std::vector<float> fSim_hadronic_hit_x_b;
+      std::vector<float> fSim_hadronic_hit_y_b;
+      std::vector<float> fSim_hadronic_hit_z_b;
+      std::vector<float> fSim_hadronic_hit_Edep_b1;
+      std::vector<float> fSim_hadronic_hit_Edep_b2;
 
       //
       // Other variables that will be shared between different methods.
@@ -236,43 +248,54 @@ namespace lar {
       // Define n-tuples
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      fNtuple->Branch("Event",                 &fEvent,                  "Event/I");
-      fNtuple->Branch("SubRun",                &fSubRun,                 "SubRun/I");
-      fNtuple->Branch("Run",                   &fRun,                    "Run/I");
+      fNtuple->Branch("Event",                    &fEvent,                  "Event/I");
+      fNtuple->Branch("SubRun",                   &fSubRun,                 "SubRun/I");
+      fNtuple->Branch("Run",                      &fRun,                    "Run/I");
       // Simulation branches Sim*
-      fNtuple->Branch("Sim_nMu",               &fSim_nMu,                "Sim_nMu/I");
+      fNtuple->Branch("Sim_nMu",                  &fSim_nMu,                "Sim_nMu/I");
       // muon position
-      fNtuple->Branch("Sim_mu_start_vx",       &fSim_mu_start_vx,        "Sim_mu_start_vx/D");
-      fNtuple->Branch("Sim_mu_start_vy",       &fSim_mu_start_vy,        "Sim_mu_start_vy/D");
-      fNtuple->Branch("Sim_mu_start_vz",       &fSim_mu_start_vz,        "Sim_mu_start_vz/D");
-      fNtuple->Branch("Sim_mu_end_vx",         &fSim_mu_end_vx,          "Sim_mu_end_vx/D");
-      fNtuple->Branch("Sim_mu_end_vy",         &fSim_mu_end_vy,          "Sim_mu_end_vy/D");
-      fNtuple->Branch("Sim_mu_end_vz",         &fSim_mu_end_vz,          "Sim_mu_end_vz/D");
+      fNtuple->Branch("Sim_mu_start_vx",          &fSim_mu_start_vx,        "Sim_mu_start_vx/D");
+      fNtuple->Branch("Sim_mu_start_vy",          &fSim_mu_start_vy,        "Sim_mu_start_vy/D");
+      fNtuple->Branch("Sim_mu_start_vz",          &fSim_mu_start_vz,        "Sim_mu_start_vz/D");
+      fNtuple->Branch("Sim_mu_end_vx",            &fSim_mu_end_vx,          "Sim_mu_end_vx/D");
+      fNtuple->Branch("Sim_mu_end_vy",            &fSim_mu_end_vy,          "Sim_mu_end_vy/D");
+      fNtuple->Branch("Sim_mu_end_vz",            &fSim_mu_end_vz,          "Sim_mu_end_vz/D");
       // muon momentum
-      fNtuple->Branch("Sim_mu_start_px",       &fSim_mu_start_px,        "Sim_mu_start_px/D");
-      fNtuple->Branch("Sim_mu_start_py",       &fSim_mu_start_py,        "Sim_mu_start_py/D");
-      fNtuple->Branch("Sim_mu_start_pz",       &fSim_mu_start_pz,        "Sim_mu_start_pz/D");
-      fNtuple->Branch("Sim_mu_end_px",         &fSim_mu_end_px,          "Sim_mu_end_px/D");
-      fNtuple->Branch("Sim_mu_end_py",         &fSim_mu_end_py,          "Sim_mu_end_py/D");
-      fNtuple->Branch("Sim_mu_end_pz",         &fSim_mu_end_pz,          "Sim_mu_end_pz/D");
-      // Write arrays giving the address of the array: simply the array name.
-      fNtuple->Branch("Sim_mu_start_4position", fSim_mu_start_4position, "Sim_mu_start_4position[4]/D");
-      fNtuple->Branch("Sim_mu_end_4position",   fSim_mu_end_4position,   "Sim_mu_end_4position[4]/D");
-      fNtuple->Branch("Sim_mu_start_4mommenta", fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_mu_end_4mommenta",   fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
-      fNtuple->Branch("Sim_mu_track_length",   &fSim_mu_track_length,    "Sim_mu_track_length/D");
-      fNtuple->Branch("Sim_hadronic_Edep_a1",  &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
-      fNtuple->Branch("Sim_hadronic_Edep_a2",  &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
-      fNtuple->Branch("Sim_hadronic_Edep_b1",  &fSim_hadronic_Edep_b1,   "Sim_hadronic_Edep_b1/D");
-      fNtuple->Branch("Sim_hadronic_Edep_b2",  &fSim_hadronic_Edep_b2,   "Sim_hadronic_Edep_b2/D");
+      fNtuple->Branch("Sim_mu_start_px",          &fSim_mu_start_px,        "Sim_mu_start_px/D");
+      fNtuple->Branch("Sim_mu_start_py",          &fSim_mu_start_py,        "Sim_mu_start_py/D");
+      fNtuple->Branch("Sim_mu_start_pz",          &fSim_mu_start_pz,        "Sim_mu_start_pz/D");
+      fNtuple->Branch("Sim_mu_end_px",            &fSim_mu_end_px,          "Sim_mu_end_px/D");
+      fNtuple->Branch("Sim_mu_end_py",            &fSim_mu_end_py,          "Sim_mu_end_py/D");
+      fNtuple->Branch("Sim_mu_end_pz",            &fSim_mu_end_pz,          "Sim_mu_end_pz/D");
+      fNtuple->Branch("Sim_mu_start_4position",    fSim_mu_start_4position, "Sim_mu_start_4position[4]/D");
+      fNtuple->Branch("Sim_mu_end_4position",      fSim_mu_end_4position,   "Sim_mu_end_4position[4]/D");
+      fNtuple->Branch("Sim_mu_start_4mommenta",    fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
+      fNtuple->Branch("Sim_mu_end_4mommenta",      fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_mu_track_length",      &fSim_mu_track_length,    "Sim_mu_track_length/D");
+      fNtuple->Branch("Sim_hadronic_Edep_a1",     &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
+      fNtuple->Branch("Sim_hadronic_Edep_a2",     &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
+      fNtuple->Branch("Sim_n_hadronic_Edep_a",    &fSim_n_hadronic_Edep_a,  "Sim_n_hadronic_Edep_a/I");
+      fNtuple->Branch("Sim_hadronic_hit_x_a",     &fSim_hadronic_hit_x_a);
+      fNtuple->Branch("Sim_hadronic_hit_y_a",     &fSim_hadronic_hit_y_a);
+      fNtuple->Branch("Sim_hadronic_hit_z_a",     &fSim_hadronic_hit_z_a);
+      fNtuple->Branch("Sim_hadronic_hit_Edep_a1", &fSim_hadronic_hit_Edep_a1);
+      fNtuple->Branch("Sim_hadronic_hit_Edep_a2", &fSim_hadronic_hit_Edep_a2);
+      fNtuple->Branch("Sim_hadronic_Edep_b1",     &fSim_hadronic_Edep_b1,   "Sim_hadronic_Edep_b1/D");
+      fNtuple->Branch("Sim_hadronic_Edep_b2",     &fSim_hadronic_Edep_b2,   "Sim_hadronic_Edep_b2/D");
+      fNtuple->Branch("Sim_n_hadronic_Edep_b",    &fSim_n_hadronic_Edep_b,  "Sim_n_hadronic_Edep_b/I");
+      fNtuple->Branch("Sim_hadronic_hit_x_b",     &fSim_hadronic_hit_x_b);
+      fNtuple->Branch("Sim_hadronic_hit_y_b",     &fSim_hadronic_hit_y_b);
+      fNtuple->Branch("Sim_hadronic_hit_z_b",     &fSim_hadronic_hit_z_b);
+      fNtuple->Branch("Sim_hadronic_hit_Edep_b1", &fSim_hadronic_hit_Edep_b1);
+      fNtuple->Branch("Sim_hadronic_hit_Edep_b2", &fSim_hadronic_hit_Edep_b2);
 
-      fNtuple->Branch("Sim_nEle",              &fSim_nEle,               "Sim_nEle/I");
-      fNtuple->Branch("Sim_nTau",              &fSim_nTau,               "Sim_nTau/I");
-      fNtuple->Branch("Sim_nPhoton",           &fSim_nPhoton,            "Sim_nPhoton/I");
-      fNtuple->Branch("Sim_nPionNeutral",      &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
-      fNtuple->Branch("Sim_nPionCharged",      &fSim_nPionCharged,       "Sim_nPionCharged/I");
-      fNtuple->Branch("Sim_nNeutron",          &fSim_nNeutron,           "Sim_nNeutron/I");
-      fNtuple->Branch("Sim_nProton",           &fSim_nProton,            "Sim_nProton/I");
+      fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
+      fNtuple->Branch("Sim_nTau",                 &fSim_nTau,               "Sim_nTau/I");
+      fNtuple->Branch("Sim_nPhoton",              &fSim_nPhoton,            "Sim_nPhoton/I");
+      fNtuple->Branch("Sim_nPionNeutral",         &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
+      fNtuple->Branch("Sim_nPionCharged",         &fSim_nPionCharged,       "Sim_nPionCharged/I");
+      fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
+      fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
 
       // Reconstruction branches
 
@@ -310,7 +333,7 @@ namespace lar {
       fSim_mu_end_py             = -99.;
       fSim_mu_end_pz             = -99.;
       fSim_mu_track_length       = -99.;
-      fSim_hadronic_Edep_a1      = 0.;
+      fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
       fSim_hadronic_Edep_a2      = 0.;
       fSim_hadronic_Edep_b1      = 0.;
       fSim_hadronic_Edep_b2      = 0.;
@@ -320,24 +343,23 @@ namespace lar {
         fSim_mu_start_4mommenta[i] = -99.;
         fSim_mu_end_4mommenta[i]   = -99.;
       }
+      fSim_hadronic_hit_x_a.clear();
+      fSim_hadronic_hit_y_a.clear();
+      fSim_hadronic_hit_z_a.clear();
+      fSim_hadronic_hit_Edep_a1.clear();
+      fSim_hadronic_hit_Edep_a2.clear();
+      fSim_hadronic_hit_x_b.clear();
+      fSim_hadronic_hit_y_b.clear();
+      fSim_hadronic_hit_z_b.clear();
+      fSim_hadronic_hit_Edep_b1.clear();
+      fSim_hadronic_hit_Edep_b2.clear();
 
       // LArSoft data products: https://larsoft.org/important-concepts-in-larsoft/data-products/
-      // Data products relevant for this analyzer:
-      //   Particle generation:
-      //     simb::MCTruth:    the interaction generated by event generators like GENIE, Corsika, etc.; usually, one for each generator
-      //     simb::MCParticle: a single generated particle, either by an event generator (GENIE, Corsika, …) or by the detector simulation (GEANT4)
-      //   Detector simulation:
-      //     sim::SimChannel:  the electrons deposited on one TPC readout channel, as function of time, and connected to the generated particle which produced them
-      //   Particles as observed in the detector, useful to characterize the efficiency of reconstruction algorithms:
-      //     sim::MCHit:       charge from a single particle seen by a TPC readout channel
-      //     sim::MCTrack:     the observable energy deposit coming from a single particle
-      //     sim::MCShower:    the observable energy deposit coming from a electromagnetic shower of particles
-      // We need to data products from detector simulation as we need to know FD events that is not observable in ND
 
       art::Handle<std::vector<simb::MCParticle>> particleHandle;
 
       // Then fill the vector with all the objects
-      if (!event.getByLabel(fSimulationProducerLabel, particleHandle)) {
+      if ( !event.getByLabel(fSimulationProducerLabel, particleHandle) ) {
         // If no MCParticles in an event, throw an exception to force this module to stop.
         throw cet::exception("MyEnergyAnalysis") << " No simb::MCParticle objects in this event - " << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
       }
@@ -364,7 +386,7 @@ namespace lar {
       std::vector<const simb::MCParticle*> SimProtons;
 
       // Loop over the list of particles in the event
-      for (auto const& particle : (*particleHandle)) {
+      for ( auto const& particle : (*particleHandle) ) {
 
         // For the methods you can call for MCParticle, see ${NUSIMDATA_INC}/nusimdata/SimulationBase/MCParticle.h.
         fSimTrackID = particle.TrackId();
@@ -437,14 +459,14 @@ namespace lar {
         // Calculate length using spherical cooridnate system: assume straight track? time negligible?
         const double trackLength = (positionEnd - positionStart).Rho();
         fSim_mu_track_length = trackLength;
-      }
+      } // End if muon exists
 
       //
       // Calculate sim hadronic deposit energy
       //
 
       // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
-      for (auto const& channel : (*simChannelHandle)) {
+      for ( auto const& channel : (*simChannelHandle) ) {
 
         // Get the numeric ID associated with this channel.
         // See methods at https://internal.dunescience.org/doxygen/SimChannel_8h_source.html
@@ -470,40 +492,58 @@ namespace lar {
 
             // If it's not from primary leptons, count it as hadronic
             if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 ) {
-              //
-              // Note: There is more than one plane that reacts to charge in the TPC.
-              //
 
+              //
               // Method a: only include the energy from the collection plane: geo::kCollection defined in
               // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
+              //
               if ( fGeometryService->SignalType(channelNumber) == geo::kCollection ) {
-
+                //
                 // Note: there are also two ways to get E deposit for sim::IDE
+                //
                 fSim_hadronic_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
                 fSim_hadronic_Edep_a2 += energyDeposit.energy;
+
+                // Store position and E for each deposit
+                fSim_hadronic_hit_x_a.push_back(energyDeposit.x);
+                fSim_hadronic_hit_y_a.push_back(energyDeposit.y);
+                fSim_hadronic_hit_z_a.push_back(energyDeposit.z);
+                fSim_hadronic_hit_Edep_a1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
+                fSim_hadronic_hit_Edep_a2.push_back(energyDeposit.energy);
               } // end if access plane info via channel signal type
 
+              //
               // Method b: navigate via channel -> wire -> plane ID, and require planeID to be 0.
+              //
               std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-              if( Wires[0].planeID().Plane == 0 ) {
+              if ( Wires[0].planeID().Plane == 0 ) {
+
                 fSim_hadronic_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
                 fSim_hadronic_Edep_b2 += energyDeposit.energy;
+
+                // Store position and E for each deposit
+                fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
+                fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
+                fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
+                fSim_hadronic_hit_Edep_b1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
+                fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
               } // end if access plane info via channel -> wire -> plane ID is 0
 
-              // Get the (x,y,z) of the energy deposit.
-              // TVector3 location(energyDeposit.x, energyDeposit.y, energyDeposit.z);
 
             } // end if hadronic
           }   // end For each energy deposit
         }     // end For each time slice
       }       // end For each SimChannel
 
+      fSim_n_hadronic_Edep_a = fSim_hadronic_hit_x_a.size();
+      fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
+
       // In general, objects in the LArSoft reconstruction chain are linked using the art::Assns class:
       // <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Using_art_in_LArSoft#artAssns>
       // The following statement will find the simb::MCTruth associated with the simb::MCParticle
       const art::FindManyP<simb::MCTruth> findManyTruth(particleHandle, event, fSimulationProducerLabel);
 
-      if (!findManyTruth.isValid()) {
+      if ( !findManyTruth.isValid() ) {
         std::cout << "findManyTruth simb::MCTruth for simb::MCParticle failed!" << std::endl;
       }
 
@@ -511,7 +551,7 @@ namespace lar {
       auto const& truth = findManyTruth.at(particle_index);
 
       // Make sure there's no problem.
-      if (truth.empty()) {
+      if ( truth.empty() ) {
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
 
@@ -519,13 +559,13 @@ namespace lar {
 
       // Example to find what hits are associated with clusters.
       art::Handle<std::vector<recob::Cluster>> clusterHandle;
-      if (!event.getByLabel(fClusterProducerLabel, clusterHandle)) return;
+      if ( !event.getByLabel(fClusterProducerLabel, clusterHandle) ) return;
 
       // Note that this is not as trivial a query as the one with MCTruth, since it's
       // possible for a hit to be assigned to more than one cluster.
       const art::FindManyP<recob::Hit> findManyHits(clusterHandle, event, fClusterProducerLabel);
 
-      if (!findManyHits.isValid()) {
+      if ( !findManyHits.isValid() ) {
         std::cout << "findManyHits recob::Hit for recob::Cluster failed;" << " cluster label='" << fClusterProducerLabel << "'"<< std::endl;
       }
 
