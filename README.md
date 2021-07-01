@@ -66,7 +66,7 @@ git push
 
 ## Instruction for environment setup from NN group machine: ivy.physics.sunysb.edu (CentOS 6.10)
 
-I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up your work directory](#set-up-your-work-directory).
+I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up work area on Ivy](#set-up-work-area-on-ivy).
 
 ```
 #
@@ -83,7 +83,7 @@ chmod +x ./pullProducts
 #
 ```
 
-### Set up your work directory
+### Set up work area on Ivy
 
 [First time only]
 
@@ -164,3 +164,47 @@ From NN group machine:
 For reference, the ND analysis uses [these](https://github.com/DUNE/ND_CAFMaker) to produce CAF files (ntuples).
 
 The ```dumptree.py``` file uses functions in this [repo](https://github.com/cvilelahep/DUNE_ND_GeoEff).
+
+## [!Under construction!] Instruction for environment setup from SeaWulf cluster: seawulf.stonybrook.edu (CentOS 7.9.2009)
+
+Use the following setup to first install a DUNE software release on the SeaWulf machine. Note files older than 1 month will be purged from the SeaWulf scratch directory, so you may want to ask for more quota in your SeaWulf home area and do the following software installation (need more than 20 GB) there. After that, go to [Set up work area on SeaWulf](#set-up-work-area-on-SeaWulf).
+
+```
+cd /gpfs/scratch/<netID>                                                                                                    
+mkdir ups
+mkdir upstars
+cd upstars
+wget https://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts
+chmod +x ./pullProducts
+./pullProducts /gpfs/scratch/<netID>/ups slf7 dune-v09_22_02 e19 debug
+```
+
+### Set up work area on SeaWulf
+
+This setup doesn't work yet, ```mrbsetenv``` reports ```ERROR: Action parsing failed on "unsetuprequired(cmake v3_13_2)"```. In principle, need to install cmake.
+
+[First time only]
+
+```
+mkdir ~/FDEff                                                                            # First time only
+cd ~/FDEff
+source /gpfs/scratch/<netID>/ups/setup                                                   # You can use mine as I've installed it: source /gpfs/scratch/weishi2/ups/setup
+setup git
+setup gitflow
+setup mrb
+setup dunetpc v09_22_02 -q e19:debug
+
+export MRB_PROJECT=larsoft                                                               # Need to set ${MRB_PROJECT} to the master product
+mrb newDev
+source /gpfs/home/<netID>/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
+# For example: source /gpfs/home/weishi2/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
+
+cd srcs                            
+git clone https://github.com/weishi10141993/myntuples.git                                # First time only, checkout the analysis code from GitHub
+
+mrb uc                                                                                   # Tell mrb to update CMakeLists.txt with the latest version numbers of the products.
+cd ${MRB_BUILDDIR}                                                                       # Go to your build directory
+mrb z
+mrbsetenv                                                                               
+mrb install   
+```
