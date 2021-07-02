@@ -165,9 +165,9 @@ For reference, the ND analysis uses [these](https://github.com/DUNE/ND_CAFMaker)
 
 The ```dumptree.py``` file uses functions in this [repo](https://github.com/cvilelahep/DUNE_ND_GeoEff).
 
-## [!Under construction!] Instruction for environment setup from SeaWulf cluster: seawulf.stonybrook.edu (CentOS 7.9.2009)
+## [!!! Under construction !!!] Instruction for environment setup from SeaWulf cluster: seawulf.stonybrook.edu (CentOS 7.9.2009)
 
-Use the following setup to first install a DUNE software release on the SeaWulf machine. Note files older than 1 month will be purged from the SeaWulf scratch directory, so you may want to ask for more quota in your SeaWulf home area and do the following software installation (need more than 20 GB) there. After that, go to [Set up work area on SeaWulf](#set-up-work-area-on-SeaWulf).
+Use the following setup to first install a DUNE software release on the SeaWulf machine. Note files older than 1 month will be purged from the SeaWulf scratch directory, so you may want to ask for more quota in your SeaWulf home area and do the following software installation (need more than 20 GB) there. After that, go to [Install CMake binaries](#install-cmake-binaries) and [Set up work area on SeaWulf](#set-up-work-area-on-SeaWulf).
 
 ```
 cd /gpfs/scratch/<netID>                                                                                                    
@@ -179,9 +179,19 @@ chmod +x ./pullProducts
 ./pullProducts /gpfs/scratch/<netID>/ups slf7 dune-v09_22_02 e19 debug
 ```
 
+### Install CMake binaries
+
+```
+mkdir ~/CMake
+cd ~/CMake
+wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz
+tar xf cmake-3.13.2-Linux-x86_64.tar.gz
+export PATH="/gpfs/home/<netID>/CMake/cmake-3.13.2-Linux-x86_64/bin:$PATH"               # Save it in .bashrc if needed
+```
+
 ### Set up work area on SeaWulf
 
-This setup doesn't work yet, ```mrbsetenv``` reports ```ERROR: Action parsing failed on "unsetuprequired(cmake v3_13_2)"```. In principle, need to install cmake.
+This setup doesn't work yet. ```mrbsetenv``` reports ```ERROR: Action parsing failed on "unsetuprequired(cmake v3_13_2)"```.
 
 [First time only]
 
