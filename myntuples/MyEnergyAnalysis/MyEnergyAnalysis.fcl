@@ -44,8 +44,16 @@ source:
   maxEvents:  10
 
   # Include the name of an art::Event input file
-  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/21/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root",
-              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/31/11/nu_dune10kt_1x2x6_13009312_0_20181104T221530_gen_g4_detsim_reco.root"]
+  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/31/11/nu_dune10kt_1x2x6_13009312_0_20181104T221530_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/24/nu_dune10kt_1x2x6_12855866_0_20181104T211351_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/23/01/nu_dune10kt_1x2x6_13027244_0_20181110T035359_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/24/65/nu_dune10kt_1x2x6_13027220_0_20181110T035022_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/24/68/nu_dune10kt_1x2x6_13027344_0_20181110T041817_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/24/99/nu_dune10kt_1x2x6_13027243_0_20181110T035402_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/25/09/nu_dune10kt_1x2x6_13027321_0_20181110T041215_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/25/12/nu_dune10kt_1x2x6_13027221_0_20181110T035034_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/25/16/nu_dune10kt_1x2x6_13027289_0_20181110T040519_gen_g4_detsim_reco.root",
+              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/86/27/57/nu_dune10kt_1x2x6_13027311_0_20181110T041119_gen_g4_detsim_reco.root"]
 }
 
 
