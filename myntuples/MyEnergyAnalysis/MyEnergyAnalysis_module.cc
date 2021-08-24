@@ -152,31 +152,37 @@ namespace lar {
       //
       int fSimPDG;                       // MCParticle PDG ID
       int fSimTrackID;                   // GEANT ID of the particle being processed
-      int fSim_nEle;                     // Number of Sim electrons (e+/e-) in the event
-      int fSim_nMu;                      // Number of Sim muons (mu+/mu-) in the event
-      int fSim_nTau;                     // Number of Sim tau leptons (+/-) in the event
-      int fSim_nPhoton;                  // Number of Sim photons in the event
-      int fSim_nPionNeutral;             // Number of Sim pi+/pi- in the event
-      int fSim_nPionCharged;             // Number of Sim pi0 in the event
-      int fSim_nNeutron;                 // Number of Sim neutrons in the event
-      int fSim_nProton;                  // Number of Sim protons in the event
+      int fSim_nEle;                     // No. of Sim electrons (e+/e-)
+      int fSim_nNue;                     // No. of Sim electron neutrinos (nue and nuebar)
+      int fSim_nMu;                      // No. of Sim muons (mu+/mu-)
+      int fSim_nNumu;                    // No. of Sim muon neutrinos (numu and numubar)
+      int fSim_nTau;                     // No. of Sim tau leptons (+/-)
+      int fSim_nNutau;                   // No. of Sim tau neutrinos (nutau and nutaubar)
+      int fSim_nPhoton;                  // No. of Sim photons
+      int fSim_nPionNeutral;             // No. of Sim pi+/pi-
+      int fSim_nPionCharged;             // No. of Sim pi0
+      int fSim_nNeutron;                 // No. of Sim neutrons
+      int fSim_nProton;                  // No. of Sim protons
+      double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
       double fSim_mu_start_vy;           // y .....................................
       double fSim_mu_start_vz;           // z .....................................
+      double fSim_mu_start_4position[4]; // (x,y,z,t) of the muon trajectory start
       double fSim_mu_end_vx;             // x position of the muon trajectory end
       double fSim_mu_end_vy;             // y ...................................
       double fSim_mu_end_vz;             // z ...................................
+      double fSim_mu_end_4position[4];   // ................................ end
       double fSim_mu_start_px;           // x momentum of the muon trajectory start
       double fSim_mu_start_py;           // y .....................................
       double fSim_mu_start_pz;           // z .....................................
+      double fSim_mu_start_E;            // Energy of leading mu
+      double fSim_mu_start_4mommenta[4]; // (Px,Py,Pz,E) of the muon trajectory start
       double fSim_mu_end_px;             // x momentum of the muon trajectory end
       double fSim_mu_end_py;             // y ...................................
       double fSim_mu_end_pz;             // z ...................................
-      double fSim_mu_start_4position[4]; // (x,y,z,t) of the muon trajectory start
-      double fSim_mu_end_4position[4];   // ................................ end
-      double fSim_mu_start_4mommenta[4]; // (Px,Py,Pz,E) of the muon trajectory start
+      double fSim_mu_end_E;              // Energy of leading mu
       double fSim_mu_end_4mommenta[4];   // ................................... end
-      double fSim_mu_track_length;       // muon track length
+      double fSim_mu_track_length;       // leading mu track length
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
@@ -252,7 +258,19 @@ namespace lar {
       fNtuple->Branch("SubRun",                   &fSubRun,                 "SubRun/I");
       fNtuple->Branch("Run",                      &fRun,                    "Run/I");
       // Simulation branches Sim*
+      fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
+      fNtuple->Branch("Sim_nNue",                 &fSim_nNue,               "Sim_nNue/I");
       fNtuple->Branch("Sim_nMu",                  &fSim_nMu,                "Sim_nMu/I");
+      fNtuple->Branch("Sim_nNumu",                &fSim_nNumu,              "Sim_nNumu/I");
+      fNtuple->Branch("Sim_nTau",                 &fSim_nTau,               "Sim_nTau/I");
+      fNtuple->Branch("Sim_nNutau",               &fSim_nNutau,             "Sim_nNutau/I");
+      fNtuple->Branch("Sim_nPhoton",              &fSim_nPhoton,            "Sim_nPhoton/I");
+      fNtuple->Branch("Sim_nPionNeutral",         &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
+      fNtuple->Branch("Sim_nPionCharged",         &fSim_nPionCharged,       "Sim_nPionCharged/I");
+      fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
+      fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
+      // neutrino E
+      fNtuple->Branch("Sim_numu_E",               &fSim_numu_E,             "Sim_numu_E/D");
       // muon position
       fNtuple->Branch("Sim_mu_start_vx",          &fSim_mu_start_vx,        "Sim_mu_start_vx/D");
       fNtuple->Branch("Sim_mu_start_vy",          &fSim_mu_start_vy,        "Sim_mu_start_vy/D");
@@ -264,9 +282,11 @@ namespace lar {
       fNtuple->Branch("Sim_mu_start_px",          &fSim_mu_start_px,        "Sim_mu_start_px/D");
       fNtuple->Branch("Sim_mu_start_py",          &fSim_mu_start_py,        "Sim_mu_start_py/D");
       fNtuple->Branch("Sim_mu_start_pz",          &fSim_mu_start_pz,        "Sim_mu_start_pz/D");
+      fNtuple->Branch("Sim_mu_start_E",           &fSim_mu_start_E,         "Sim_mu_start_E/D");
       fNtuple->Branch("Sim_mu_end_px",            &fSim_mu_end_px,          "Sim_mu_end_px/D");
       fNtuple->Branch("Sim_mu_end_py",            &fSim_mu_end_py,          "Sim_mu_end_py/D");
       fNtuple->Branch("Sim_mu_end_pz",            &fSim_mu_end_pz,          "Sim_mu_end_pz/D");
+      fNtuple->Branch("Sim_mu_end_E",             &fSim_mu_end_E,           "Sim_mu_end_E/D");
       fNtuple->Branch("Sim_mu_start_4position",    fSim_mu_start_4position, "Sim_mu_start_4position[4]/D");
       fNtuple->Branch("Sim_mu_end_4position",      fSim_mu_end_4position,   "Sim_mu_end_4position[4]/D");
       fNtuple->Branch("Sim_mu_start_4mommenta",    fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
@@ -288,14 +308,6 @@ namespace lar {
       fNtuple->Branch("Sim_hadronic_hit_z_b",     &fSim_hadronic_hit_z_b);
       fNtuple->Branch("Sim_hadronic_hit_Edep_b1", &fSim_hadronic_hit_Edep_b1);
       fNtuple->Branch("Sim_hadronic_hit_Edep_b2", &fSim_hadronic_hit_Edep_b2);
-
-      fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
-      fNtuple->Branch("Sim_nTau",                 &fSim_nTau,               "Sim_nTau/I");
-      fNtuple->Branch("Sim_nPhoton",              &fSim_nPhoton,            "Sim_nPhoton/I");
-      fNtuple->Branch("Sim_nPionNeutral",         &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
-      fNtuple->Branch("Sim_nPionCharged",         &fSim_nPionCharged,       "Sim_nPionCharged/I");
-      fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
-      fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
 
       // Reconstruction branches
 
@@ -320,6 +332,7 @@ namespace lar {
       fSubRun = event.subRun();
 
       // Initialize
+      fSim_numu_E                = -99.;
       fSim_mu_start_vx           = -99.;
       fSim_mu_start_vy           = -99.;
       fSim_mu_start_vz           = -99.;
@@ -329,9 +342,11 @@ namespace lar {
       fSim_mu_start_px           = -99.;
       fSim_mu_start_py           = -99.;
       fSim_mu_start_pz           = -99.;
+      fSim_mu_start_E            = -99.;
       fSim_mu_end_px             = -99.;
       fSim_mu_end_py             = -99.;
       fSim_mu_end_pz             = -99.;
+      fSim_mu_end_E              = -99.;
       fSim_mu_track_length       = -99.;
       fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
       fSim_hadronic_Edep_a2      = 0.;
@@ -377,8 +392,11 @@ namespace lar {
 
       // Store specific particles
       std::vector<const simb::MCParticle*> SimElectrons;
+      std::vector<const simb::MCParticle*> SimNues;
       std::vector<const simb::MCParticle*> SimMuons;
+      std::vector<const simb::MCParticle*> SimNumus;
       std::vector<const simb::MCParticle*> SimTaus;
+      std::vector<const simb::MCParticle*> SimNutaus;
       std::vector<const simb::MCParticle*> SimPhotons;
       std::vector<const simb::MCParticle*> SimNeutralPions;
       std::vector<const simb::MCParticle*> SimChargedPions;
@@ -398,8 +416,11 @@ namespace lar {
         fSimPDG = particle.PdgCode();
         if ( particle.Process() == "primary" ) {
           if ( abs(fSimPDG) == 11 )   SimElectrons.push_back(&particle);
+          if ( abs(fSimPDG) == 12 )   SimNues.push_back(&particle);
           if ( abs(fSimPDG) == 13 )   SimMuons.push_back(&particle);
+          if ( abs(fSimPDG) == 14 )   SimNumus.push_back(&particle);
           if ( abs(fSimPDG) == 15 )   SimTaus.push_back(&particle);
+          if ( abs(fSimPDG) == 16 )   SimNutaus.push_back(&particle);
           if ( abs(fSimPDG) == 22 )   SimPhotons.push_back(&particle);
           if ( abs(fSimPDG) == 111 )  SimNeutralPions.push_back(&particle);
           if ( abs(fSimPDG) == 211 )  SimChargedPions.push_back(&particle);
@@ -410,16 +431,26 @@ namespace lar {
       } // end loop over all particles in the event.
 
       fSim_nEle         = SimElectrons.size();
+      fSim_nNue         = SimNues.size();
       fSim_nMu          = SimMuons.size();
+      fSim_nNumu        = SimNumus.size();
       fSim_nTau         = SimTaus.size();
+      fSim_nNutau       = SimNutaus.size();
       fSim_nPhoton      = SimPhotons.size();
       fSim_nPionNeutral = SimNeutralPions.size();
       fSim_nPionCharged = SimChargedPions.size();
       fSim_nNeutron     = SimNeutrons.size();
       fSim_nProton      = SimProtons.size();
 
-      // If multiple sim muons present in event, sort momentum from high to low
-      if ( fSim_nMu > 1 ) std::sort(SimMuons.begin(), SimMuons.end(), MomentumOrderMCParticle);
+      // If multiple sim particles present in event, sort momentum from high to low
+      if ( fSim_nNumu > 1 ) std::sort(SimNumus.begin(), SimNumus.end(), MomentumOrderMCParticle);
+      if ( fSim_nMu > 1 )   std::sort(SimMuons.begin(), SimMuons.end(), MomentumOrderMCParticle);
+
+      // Store info for leading E sim numu
+      if ( fSim_nNumu > 0 ) {
+        const simb::MCParticle& leadingnumu = *(SimNumus[0]);
+        fSim_numu_E = leadingnumu.E(0);
+      }
 
       // Store info for leading momentum sim muon
       if ( fSim_nMu > 0 ) {
@@ -440,15 +471,17 @@ namespace lar {
         fSim_mu_start_vx = leadingmu.Vx(0); // unit?
         fSim_mu_start_vy = leadingmu.Vy(0);
         fSim_mu_start_vz = leadingmu.Vz(0);
-        fSim_mu_end_vx = leadingmu.Vx(last);
-        fSim_mu_end_vy = leadingmu.Vy(last);
-        fSim_mu_end_vz = leadingmu.Vz(last);
+        fSim_mu_end_vx   = leadingmu.Vx(last);
+        fSim_mu_end_vy   = leadingmu.Vy(last);
+        fSim_mu_end_vz   = leadingmu.Vz(last);
         fSim_mu_start_px = leadingmu.Px(0);
         fSim_mu_start_py = leadingmu.Py(0);
         fSim_mu_start_pz = leadingmu.Pz(0);
-        fSim_mu_end_px = leadingmu.Px(last);
-        fSim_mu_end_py = leadingmu.Py(last);
-        fSim_mu_end_pz = leadingmu.Pz(last);
+        fSim_mu_start_E  = leadingmu.E(0);
+        fSim_mu_end_px   = leadingmu.Px(last);
+        fSim_mu_end_py   = leadingmu.Py(last);
+        fSim_mu_end_pz   = leadingmu.Pz(last);
+        fSim_mu_end_E    = leadingmu.E(last);
 
         // Fill arrays with the 4-values.
         positionStart.GetXYZT(fSim_mu_start_4position);
