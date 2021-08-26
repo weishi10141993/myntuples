@@ -76,6 +76,9 @@ namespace lar {
      * Configuration parameters
      * =========================
      *
+     * - *GenieGenModuleLabel* (string, default: "generator"): tag of the input data
+     *   product with the event generator information
+     *
      * - *SimulationLabel* (string, default: "largeant"): tag of the input data
      *   product with the detector simulation information (typically an instance
      *   of the LArG4 module)
@@ -99,6 +102,11 @@ namespace lar {
         using Comment = fhicl::Comment;
 
         // One Atom for each parameter
+        fhicl::Atom<art::InputTag> GenieGenModuleLabel{
+          Name("GenieGenModuleLabel"),
+          Comment("tag of the input data product with the event generator "
+                  "information")};
+
         fhicl::Atom<art::InputTag> SimulationLabel{
           Name("SimulationLabel"),
           Comment("tag of the input data product with the detector simulation "
@@ -134,12 +142,13 @@ namespace lar {
 
     private:
 
-      // The parameters we'll read from the .fcl file.
+      // The parameters we will read from the .fcl file.
+      art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
       art::InputTag fHitProducerLabel;        // The name of the producer that created hits
       art::InputTag fClusterProducerLabel;    // The name of the producer that created clusters
 
-      // The n-tuple we'll create.
+      // The n-tuple to create
       TTree* fNtuple;
 
       // Event info
@@ -148,7 +157,7 @@ namespace lar {
       int fSubRun; // number of the sub-run being processed
 
       //
-      // Variables related to simulation
+      // Variables related to geneator/simulation
       //
       int fSimPDG;                       // MCParticle PDG ID
       int fSimTrackID;                   // GEANT ID of the particle being processed
@@ -163,6 +172,7 @@ namespace lar {
       int fSim_nPionCharged;             // No. of Sim pi0
       int fSim_nNeutron;                 // No. of Sim neutrons
       int fSim_nProton;                  // No. of Sim protons
+      double fGen_numu_E;                // Energy of generator level neutrino
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
       double fSim_mu_start_vy;           // y .....................................
@@ -223,6 +233,7 @@ namespace lar {
 
     MyEnergyAnalysis::MyEnergyAnalysis(Parameters const& config)
       : EDAnalyzer(config)
+      , fGenieGenModuleLabel(config().GenieGenModuleLabel())
       , fSimulationProducerLabel(config().SimulationLabel())
       , fHitProducerLabel(config().HitLabel())
       , fClusterProducerLabel(config().ClusterLabel())
@@ -232,6 +243,7 @@ namespace lar {
 
       // Tell beforehand all the data the module is going to read ("consumes") or
       // might read ("may_consume").
+      consumes<std::vector<simb::MCTruth>>(fGenieGenModuleLabel);
       consumes<std::vector<simb::MCParticle>>(fSimulationProducerLabel);
       consumes<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
       consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
@@ -257,6 +269,8 @@ namespace lar {
       fNtuple->Branch("Event",                    &fEvent,                  "Event/I");
       fNtuple->Branch("SubRun",                   &fSubRun,                 "SubRun/I");
       fNtuple->Branch("Run",                      &fRun,                    "Run/I");
+      // GEN neutrino E
+      fNtuple->Branch("Gen_numu_E",               &fGen_numu_E,             "Gen_numu_E/D");
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
       fNtuple->Branch("Sim_nNue",                 &fSim_nNue,               "Sim_nNue/I");
@@ -269,7 +283,7 @@ namespace lar {
       fNtuple->Branch("Sim_nPionCharged",         &fSim_nPionCharged,       "Sim_nPionCharged/I");
       fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
       fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
-      // neutrino E
+      // GEANT level neutrino E
       fNtuple->Branch("Sim_numu_E",               &fSim_numu_E,             "Sim_numu_E/D");
       // muon position
       fNtuple->Branch("Sim_mu_start_vx",          &fSim_mu_start_vx,        "Sim_mu_start_vx/D");
@@ -332,6 +346,7 @@ namespace lar {
       fSubRun = event.subRun();
 
       // Initialize
+      fGen_numu_E                = -99.;
       fSim_numu_E                = -99.;
       fSim_mu_start_vx           = -99.;
       fSim_mu_start_vy           = -99.;
@@ -371,13 +386,19 @@ namespace lar {
 
       // LArSoft data products: https://larsoft.org/important-concepts-in-larsoft/data-products/
 
-      art::Handle<std::vector<simb::MCParticle>> particleHandle;
+      //
+      // Process generator level info
+      //
 
-      // Then fill the vector with all the objects
-      if ( !event.getByLabel(fSimulationProducerLabel, particleHandle) ) {
-        // If no MCParticles in an event, throw an exception to force this module to stop.
-        throw cet::exception("MyEnergyAnalysis") << " No simb::MCParticle objects in this event - " << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
-      }
+      // c.f. https://github.com/DUNE/dunetpc/blob/master/dune/FDSensOpt/CAFMaker_module.cc#L720
+      //      https://github.com/DUNE/dunetpc/blob/master/dune/FDSensOpt/NueAna_module.cc#L639
+      art::Handle<std::vector<simb::MCTruth>> mctruthListHandle; // Generator level truth
+      std::vector<art::Ptr<simb::MCTruth>> mclist;
+      if ( event.getByLabel(fGenieGenModuleLabel, mctruthListHandle) ) art::fill_ptr_vector(mclist, mctruthListHandle);
+
+      // Why there could be more than one MCTruth?
+      if ( mclist.size() ) fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
+      // Is evt vtx GetNeutrino().Nu().Vx()?
 
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
@@ -387,8 +408,16 @@ namespace lar {
       std::map<int, const simb::MCParticle*> particleMap;
 
       //
-      // Process Sim MC particles info
+      // Process Sim MCparticles info
       //
+
+      art::Handle<std::vector<simb::MCParticle>> particleHandle; // GEANT 4 level truth
+
+      // Then fill the vector with all the objects
+      if ( !event.getByLabel(fSimulationProducerLabel, particleHandle) ) {
+        // If no MCParticles in an event, throw an exception to force this module to stop.
+        throw cet::exception("MyEnergyAnalysis") << " No simb::MCParticle objects in this event - " << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
+      }
 
       // Store specific particles
       std::vector<const simb::MCParticle*> SimElectrons;
@@ -446,7 +475,7 @@ namespace lar {
       if ( fSim_nNumu > 1 ) std::sort(SimNumus.begin(), SimNumus.end(), MomentumOrderMCParticle);
       if ( fSim_nMu > 1 )   std::sort(SimMuons.begin(), SimMuons.end(), MomentumOrderMCParticle);
 
-      // Store info for leading E sim numu
+      // Store info for leading E sim numu GEANT 4 level
       if ( fSim_nNumu > 0 ) {
         const simb::MCParticle& leadingnumu = *(SimNumus[0]);
         fSim_numu_E = leadingnumu.E(0);
