@@ -69,26 +69,20 @@ namespace lar {
     // BEGIN MyEnergyAnalysis group
     // -----------------------------------------------
     // class definition
-    /**
-     * This class produces a ROOT tree that contains information
-     * from the generated/simulated and reconstructed particles.
-     *
-     * Configuration parameters
-     * =========================
-     *
-     * - *GenieGenModuleLabel* (string, default: "generator"): tag of the input data
-     *   product with the event generator information
-     *
-     * - *SimulationLabel* (string, default: "largeant"): tag of the input data
-     *   product with the detector simulation information (typically an instance
-     *   of the LArG4 module)
-     *
-     * - *HitLabel* (string, mandatory): tag of the input data product with
-     *   reconstructed hits
-     *
-     * - *ClusterLabel* (string, mandatory): tag of the input data product with
-     *   reconstructed clusters
-     */
+    //
+    // This class produces a ROOT tree that contains information
+    // from the generated/simulated and reconstructed particles.
+    //
+    // Configuration parameters
+    // =========================
+    //
+    // - GenieGenModuleLabel (string, default: "generator"): tag of the input data
+    //   product with the event generator information
+    //
+    // - SimulationLabel (string, default: "largeant"): tag of the input data
+    //   product with the detector simulation information (typically an instance
+    //   of the LArG4 module)
+    //
     class MyEnergyAnalysis : public art::EDAnalyzer {
     public:
 
@@ -111,14 +105,6 @@ namespace lar {
           Name("SimulationLabel"),
           Comment("tag of the input data product with the detector simulation "
                   "information")};
-
-        fhicl::Atom<art::InputTag> HitLabel{
-          Name("HitLabel"),
-          Comment("tag of the input data product with reconstructed hits")};
-
-        fhicl::Atom<art::InputTag> ClusterLabel{
-          Name("ClusterLabel"),
-          Comment("tag of the input data product with reconstructed clusters")};
 
       }; // Config
 
@@ -145,8 +131,6 @@ namespace lar {
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
-      art::InputTag fHitProducerLabel;        // The name of the producer that created hits
-      art::InputTag fClusterProducerLabel;    // The name of the producer that created clusters
 
       // The n-tuple to create
       TTree* fNtuple;
@@ -235,8 +219,6 @@ namespace lar {
       : EDAnalyzer(config)
       , fGenieGenModuleLabel(config().GenieGenModuleLabel())
       , fSimulationProducerLabel(config().SimulationLabel())
-      , fHitProducerLabel(config().HitLabel())
-      , fClusterProducerLabel(config().ClusterLabel())
     {
       // Get a pointer to the geometry service provider.
       fGeometryService = lar::providerFrom<geo::Geometry>();
@@ -247,9 +229,6 @@ namespace lar {
       consumes<std::vector<simb::MCParticle>>(fSimulationProducerLabel);
       consumes<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
       consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
-      consumes<std::vector<recob::Hit>>(fHitProducerLabel);
-      consumes<std::vector<recob::Cluster>>(fClusterProducerLabel);
-      consumes<art::Assns<recob::Cluster, recob::Hit>>(fHitProducerLabel);
     }
 
     //-----------------------------------------------------------------------
@@ -616,30 +595,6 @@ namespace lar {
       if ( truth.empty() ) {
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
-
-      // std::cout << "Sec. particle ID=" << particleHandle->at(particle_index).TrackId() << " <-> primary gen PDG=" << truth[0]->GetParticle(0).PdgCode() << std::endl;
-
-      // Example to find what hits are associated with clusters.
-      art::Handle<std::vector<recob::Cluster>> clusterHandle;
-      if ( !event.getByLabel(fClusterProducerLabel, clusterHandle) ) return;
-
-      // Note that this is not as trivial a query as the one with MCTruth, since it's
-      // possible for a hit to be assigned to more than one cluster.
-      const art::FindManyP<recob::Hit> findManyHits(clusterHandle, event, fClusterProducerLabel);
-
-      if ( !findManyHits.isValid() ) {
-        std::cout << "findManyHits recob::Hit for recob::Cluster failed;" << " cluster label='" << fClusterProducerLabel << "'"<< std::endl;
-      }
-
-      // Loop over the clusters to see the hits associated with each one.
-      /*
-      for (size_t cluster_index = 0; cluster_index != clusterHandle->size(); cluster_index++) {
-
-        auto const& hits = findManyHits.at(cluster_index);
-
-        // A vector of pointers to the hits associated with the cluster,
-        std::cout << "Cluster ID=" << clusterHandle->at(cluster_index).ID() << " has " << hits.size() << " hits" << std::endl;
-      }*/
 
       fNtuple->Fill();
 

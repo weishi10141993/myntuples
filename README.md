@@ -7,7 +7,7 @@ The following instruction is used to produce ROOT n-tuples from FD MC files (mcc
 [First time only]
 
 ```
-cd /dune/app/users/<your_username>
+cd /dune/app/users/weishi
 mkdir FDEff (first time only)
 cd FDEff
 
@@ -32,9 +32,11 @@ mrb install                                               # Compile the code in 
 To run on FD MC files, this produces a ROOT nTuple:
 
 ```
-cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
-#for example: cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
+cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis                  # use your username
 lar -c MyEnergyAnalysis.fcl -n -1
+# Or run with nohup
+nohup lar -c MyEnergyAnalysis.fcl -n -1 >& out_myntuple_nohup.log &                        # check status: jobs -l
+# 10k evts take about 32 minutes
 ```
 
 The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set up:
@@ -42,8 +44,7 @@ The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set
 ```
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_22_02 -q e19:debug
-source /dune/app/users/<your_username>/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
-#for example: source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
+source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup        # use your username
 mrbsetenv
 cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
@@ -65,6 +66,28 @@ To commit changed code changes to remote repository:
 git commit
 git push
 ```
+
+To get a list of all files in DUNE dataset, use SAM:
+
+```
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup dunetpc v09_22_02 -q e19:debug
+setup_fnal_security
+setup sam_web_client
+export SAM_EXPERIMENT=dune
+samweb list-file-locations --dim="defname:prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco" --schema=root -e dune
+```
+
+Or list 100 files in the dataset, do this at command line:
+
+```
+for k in `samweb list-files defname: prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco with limit 100`; do samweb get-file-access-url --schema root $k; done
+```
+
+Other SAM functions: https://wiki.dunescience.org/wiki/DUNE_Computing/Main_resources_Jan2021#Data_management:_best_practices
+
+To run a grid job on FNAL machine
+
 
 ## Instruction for environment setup from NN group machine: ivy.physics.sunysb.edu (CentOS 6.10)
 
