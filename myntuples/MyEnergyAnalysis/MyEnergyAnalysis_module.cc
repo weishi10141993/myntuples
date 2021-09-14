@@ -375,7 +375,9 @@ namespace lar {
       std::vector<art::Ptr<simb::MCTruth>> mclist;
       if ( event.getByLabel(fGenieGenModuleLabel, mctruthListHandle) ) art::fill_ptr_vector(mclist, mctruthListHandle);
 
-      // Why there could be more than one MCTruth?
+      // There could be more than one MCTruth, e.g., you might have multiple neutrino interactions per spill,
+      // in which case you’d run GENIE multiple times and have one MCTruth per interaction.
+      // Or you might want one MCTruth information for the GENIE event and another that overlays cosmic simulation or data onto the same event
       if ( mclist.size() ) fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
       // Is evt vtx GetNeutrino().Nu().Vx()?
 

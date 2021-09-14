@@ -2,18 +2,18 @@
 
 The following instruction is used to produce ROOT n-tuples from FD MC files (mcc11): [FD Beamsim Requests](https://dune-data.fnal.gov/mc/mcc11/index.html).
 
-## Instruction for environment setup from DUNE FNAL machines (dunegpvm*)
+## DUNE FNAL machines (dunegpvm*) environment setup
 
 [First time only]
 
 ```
-cd /dune/app/users/weishi
+cd /dune/app/users/weishi                                               # Replace with your username for all commands below
 mkdir FDEff (first time only)
 cd FDEff
 
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_22_02 -q e19:debug
-[optional] setup_fnal_security                            # A FNAL grid proxy to submit jobs and access data in dCache via xrootd or ifdh.
+[optional if run interactively] setup_fnal_security                     # A FNAL grid proxy to submit jobs and access data in dCache via xrootd or ifdh.
 
 mrb newDev
 source /dune/app/users/<your_username>/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
@@ -46,7 +46,7 @@ source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_22_02 -q e19:debug
 source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup        # use your username
 mrbsetenv
-cd /dune/app/users/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
+cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
 
 If changed ```MyEnergyAnalysis_module.cc```, recompile the code (do the setup above first):
@@ -67,6 +67,8 @@ git commit
 git push
 ```
 
+### Use SAM to navigate files
+
 To get a list of all files in DUNE dataset, use SAM:
 
 ```
@@ -86,12 +88,39 @@ for k in `samweb list-files defname: prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco 
 
 Other SAM functions: https://wiki.dunescience.org/wiki/DUNE_Computing/Main_resources_Jan2021#Data_management:_best_practices
 
-To run a grid job on FNAL machine
+### Run grid jobs
+
+Refer to the [DUNE computing tutorial](https://wiki.dunescience.org/wiki/DUNE_Computing/Submitting_grid_jobs_May2021#Submit_a_job).
+
+```
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup_fnal_security
+setup sam_web_client
+setup jobsub_client
+
+# Need to prestage files from tape
+samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
+
+# produce tarball containing localProducts* and fcl file
+
+# You are expected to create your own job script (e.g., /dune/app/users/kherner/submission_test_singularity.sh or /dune/app/users/kherner/run_jan2021tutorial.sh). It needs to take care of what is to be run and it needs to handle the input and output files. In this case, we use Grid_job_Congif.sh.
+
+jobsub_submit -G dune -M -N 1 --memory=1800MB --disk=2GB --expected-lifetime=3h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/kherner/may2021tutorial.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_may2021tutorial.sh
+```
+
+To check job status,
+
+```
+jobsub_q
+```
+
+The output is in the scratch area ```/pnfs/dune/scratch/users/weishi/myFDntuples```.
 
 
-## Instruction for environment setup from NN group machine: ivy.physics.sunysb.edu (CentOS 6.10)
 
-I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up work area on Ivy](#set-up-work-area-on-ivy).
+## NN group machine environment setup:
+
+On NN group machine (ivy.physics.sunysb.edu, CentOS 6.10), I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up work area on Ivy](#set-up-work-area-on-ivy).
 
 ```
 #
@@ -159,7 +188,7 @@ cd /home/<your_username>/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 # For example: cd /home/wshi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
 
-## Notes/tips for NN group machine (ivy) DUNE users:
+### Notes for NN group machine (ivy) DUNE users
 
 1. If you want to do "mrb g" on ANY machine, you need to have valid FNAL Kerberos ticket (kinit -f username@FNAL.GOV).
 
