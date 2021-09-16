@@ -14,8 +14,11 @@ pwd
 # Tarball is copied and untarred into a directory on the worker node, accessed via this CONDOR_DIR_INPUT environment variable
 ls -l $CONDOR_DIR_INPUT
 
-if [ -e ${INPUT_TAR_DIR_LOCAL}/${DIRECTORY}/setupFDEffTarBall-grid.sh ]; then
-  . ${INPUT_TAR_DIR_LOCAL}/${DIRECTORY}/setupFDEffTarBall-grid.sh
+echo "CONDOR_DIR_INPUT: ${CONDOR_DIR_INPUT}"
+echo "INPUT_TAR_DIR_LOCAL: ${INPUT_TAR_DIR_LOCAL}"
+
+if [ -e ${INPUT_TAR_DIR_LOCAL}/${DIRECTORY}/srcs/myntuples/setupFDEffTarBall-grid.sh ]; then
+  . ${INPUT_TAR_DIR_LOCAL}/${DIRECTORY}/srcs/myntuples/setupFDEffTarBall-grid.sh
 else
   echo "Error, setup script not found. Exiting."
   exit 1

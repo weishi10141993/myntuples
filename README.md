@@ -16,26 +16,27 @@ setup dunetpc v09_22_02 -q e19:debug
 [optional if run interactively] setup_fnal_security                     # A FNAL grid proxy to submit jobs and access data in dCache via xrootd or ifdh.
 
 mrb newDev
+# The prompt ask you to run this:
 source /dune/app/users/<your_username>/inspect/localProducts_larsoft_${LARSOFT_VERSION}_debug_${COMPILER}/setup
-#for example: source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
+# For example, mine is: source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
 
 cd srcs
-git clone https://github.com/weishi10141993/myntuples.git # First time only, checkout the analysis code from GitHub
+git clone https://github.com/weishi10141993/myntuples.git               # First time only, checkout the analysis code from GitHub
 
-mrb uc                                                    # Tell mrb to update CMakeLists.txt with the latest version numbers of the products.
-cd ${MRB_BUILDDIR}                                        # Go to your build directory
+mrb uc                                                                  # Tell mrb to update CMakeLists.txt with the latest version numbers of the products.
+cd ${MRB_BUILDDIR}                                                      # Go to your build directory
 mrb z
-mrbsetenv                                                 # Create the bookkeeping files needed to compile programs.
-mrb install                                               # Compile the code in ${MRB_SOURCE} and put the results in ${MRB_INSTALL}
+mrbsetenv                                                               # Create the bookkeeping files needed to compile programs.
+mrb install                                                             # Compile the code in ${MRB_SOURCE} and put the results in ${MRB_INSTALL}
 ```
 
 To run on FD MC files, this produces a ROOT nTuple:
 
 ```
-cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis                  # use your username
+cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 lar -c MyEnergyAnalysis.fcl -n -1
 # Or run with nohup
-nohup lar -c MyEnergyAnalysis.fcl -n -1 >& out_myntuple_nohup.log &                        # check status: jobs -l
+nohup lar -c MyEnergyAnalysis.fcl -n -1 >& out_myntuple_nohup.log &             # check status: jobs -l
 # 10k evts take about 32 minutes
 ```
 
@@ -44,7 +45,7 @@ The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set
 ```
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_22_02 -q e19:debug
-source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup        # use your username
+source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
 mrbsetenv
 cd /dune/app/users/weishi/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis
 ```
@@ -87,7 +88,7 @@ tar -czvf FDEff.tar.gz FDEff
 ```
 
 ```
-jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.5GB --expected-lifetime=10m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/FDEff/run_FDEffTarBall.sh
+jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.5GB --expected-lifetime=10m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/FDEff/srcs/myntuples/run_FDEffTarBall.sh
 ```
 
 Here are some reference settings:
