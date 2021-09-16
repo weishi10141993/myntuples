@@ -67,6 +67,68 @@ git commit
 git push
 ```
 
+## Run grid jobs
+
+Once the above is compiled and runs without problem interactively, you can start to produce a tarball,
+
+```
+cd /dune/app/users/weishi
+# Get job set up scripts
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/setupFDEffTarBall-grid.sh --no-check-certificate
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall.sh --no-check-certificate
+```
+
+you also need to have a grid setup for the localProducts as the grid job typically runs on a different machine than your working machine,
+
+```
+cd /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19
+cp setup setup-grid         # make a copy of the setup for grid job
+```
+
+then change ```/dune/app/users/weishi``` to ```${INPUT_TAR_DIR_LOCAL}```.
+
+Now make the tarball,
+
+```
+cd /dune/app/users/weishi
+tar -czvf FDEff.tar.gz FDEff setupFDEffTarBall-grid.sh
+# Check the tarball *.tar.gz is indeed created and open with: tar -xf *.tar.gz
+```
+
+```
+jobsub_submit -G dune -M -N 1 --memory=1000MB --disk=1GB --expected-lifetime=1h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_FDEffTarBall.sh
+```
+
+Here are some reference settings:
+For 100 events (1 file): ```--memory=338.3MB --disk=0.0GB --expected-lifetime=1m21s --cpu=1```
+For 10k events (100 files): ```--memory=?MB --disk=?GB --expected-lifetime=?h --cpu=?```
+If you don't set it, defaults are ```--memory=2000MB --disk=10GB --expected-lifetime=8h --cpu=1```.
+
+To check job status,
+
+```
+jobsub_q --user weishi
+# For more options: jobsub_q --help
+```
+
+To fetch job output,
+
+```
+jobsub_fetchlog --jobid=<id> --unzipdir=<dir>
+```
+
+The output is in the scratch area ```/pnfs/dune/scratch/users/weishi/myFDntuples``` as specified in ```run_FDEffTarBall.sh```.
+
+```
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup jobsub_client
+
+# Need to prestage files from tape
+samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
+```
+
+This instruction is based on the [DUNE computing tutorial](https://wiki.dunescience.org/wiki/DUNE_Computing/Submitting_grid_jobs_May2021#Submit_a_job).
+
 ### Use SAM to navigate files
 
 To get a list of all files in DUNE dataset, use SAM:
@@ -87,35 +149,6 @@ for k in `samweb list-files defname: prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco 
 ```
 
 Other SAM functions: https://wiki.dunescience.org/wiki/DUNE_Computing/Main_resources_Jan2021#Data_management:_best_practices
-
-### Run grid jobs
-
-Refer to the [DUNE computing tutorial](https://wiki.dunescience.org/wiki/DUNE_Computing/Submitting_grid_jobs_May2021#Submit_a_job).
-
-```
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup_fnal_security
-setup sam_web_client
-setup jobsub_client
-
-# Need to prestage files from tape
-samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
-
-# produce tarball containing localProducts* and fcl file
-
-# You are expected to create your own job script (e.g., /dune/app/users/kherner/submission_test_singularity.sh or /dune/app/users/kherner/run_jan2021tutorial.sh). It needs to take care of what is to be run and it needs to handle the input and output files. In this case, we use Grid_job_Congif.sh.
-
-jobsub_submit -G dune -M -N 1 --memory=1800MB --disk=2GB --expected-lifetime=3h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/kherner/may2021tutorial.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_may2021tutorial.sh
-```
-
-To check job status,
-
-```
-jobsub_q
-```
-
-The output is in the scratch area ```/pnfs/dune/scratch/users/weishi/myFDntuples```.
-
 
 
 ## NN group machine environment setup:
