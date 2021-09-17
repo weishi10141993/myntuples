@@ -79,21 +79,28 @@ cp setup setup-grid         # make a copy of the setup for grid job
 
 then change ```/dune/app/users/weishi``` to ```${INPUT_TAR_DIR_LOCAL}```.
 
-Now make the tarball,
-
 ```
 cd /dune/app/users/weishi
-tar -czvf FDEff.tar.gz FDEff
+# Get job set up scripts
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/setupFDEffTarBall-grid.sh --no-check-certificate
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall.sh --no-check-certificate
+
+# Now make the tarball
+tar -czvf FDEff.tar.gz FDEff setupFDEffTarBall-grid.sh
+
 # Check the tarball *.tar.gz is indeed created and open with: tar -xf *.tar.gz
 ```
 
 ```
-jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.5GB --expected-lifetime=10m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/FDEff/srcs/myntuples/run_FDEffTarBall.sh
+jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.1GB --expected-lifetime=10m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_FDEffTarBall.sh
 ```
 
 Here are some reference settings:
+
 100 events (1 file): ```--memory=338.3MB --disk=0.0GB --expected-lifetime=1m21s --cpu=1```
+
 10k events (100 files): ```--memory=?MB --disk=?GB --expected-lifetime=?h --cpu=?```
+
 Default: ```--memory=2000MB --disk=10GB --expected-lifetime=8h --cpu=1```.
 
 To check job status,
