@@ -212,7 +212,8 @@ The next time you login the ivy machine (username@ivy.physics.sunysb.edu), do th
 source /home/wshi/ups/setup
 setup mrb
 setup dunetpc v08_62_01 -q e19:py2:prof
-source /home/wshi/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
+source /home/<your_username>/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
+# For example: source /home/wshi/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
 mrbsetenv
 
 # Go to your work directory and run your study!
