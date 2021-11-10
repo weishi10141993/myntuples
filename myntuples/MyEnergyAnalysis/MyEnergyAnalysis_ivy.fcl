@@ -82,18 +82,8 @@ physics:
       # the names you see here with the "struct Config" in
       # MyEnergyAnalysis_module.cxx. You will want to add/remove/rename
       # the example parameters below to suit your task.
+      GenieGenModuleLabel: "generator"
       SimulationLabel: "largeant"
-
-
-      # Hits can be created by more than one module in
-      # ${LARRECO_DIR}/source/larreco/HitFinder. For this example, I
-      # picked the one that's usually run first.
-      HitLabel:        "gaushit"
-
-
-      # The same for clusters:
-      ClusterLabel:    "trajcluster"
-
 
       # In this example, which primary particle(s) we'll focus on in an event.
       # PDG code 13 = mu-.
