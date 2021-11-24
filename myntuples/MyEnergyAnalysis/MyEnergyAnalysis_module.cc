@@ -405,7 +405,7 @@ namespace lar {
         fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
         fCCNC_truth   = mclist[0]->GetNeutrino().CCNC(); // CC or NC interaction
       	fMode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
-        fInteractionType = mclist[0]->GetNeutrino().InteractionType() // Interaction type
+        fInteractionType = mclist[0]->GetNeutrino().InteractionType(); // Interaction type
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
 	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
