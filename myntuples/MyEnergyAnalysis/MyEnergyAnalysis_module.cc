@@ -378,7 +378,16 @@ namespace lar {
       // There could be more than one MCTruth, e.g., you might have multiple neutrino interactions per spill,
       // in which case you’d run GENIE multiple times and have one MCTruth per interaction.
       // Or you might want one MCTruth information for the GENIE event and another that overlays cosmic simulation or data onto the same event
-      if ( mclist.size() ) fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
+      if ( mclist.size() ) 
+      {
+        fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
+        ccnc_truth   = mclist[0]->GetNeutrino().CCNC(); // CC or NC interaction
+      	mode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
+        interaction_type = mclist[0]->GetNeutrino().InteractionType() // Interaction type
+        nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
+	      nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+      	nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
+      }
       // Is evt vtx GetNeutrino().Nu().Vx()?
 
       // Get all the simulated channels for the event. These channels
