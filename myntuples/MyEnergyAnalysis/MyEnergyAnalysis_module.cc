@@ -342,8 +342,8 @@ namespace lar {
 
       // Initialize
       fGen_numu_E                = -99.;
-      fCCNC_truth;     		 = -99.;
-      fMode_truth;     		 = -99.;
+      fCCNC_truth     		 = -99.;
+      fMode_truth     		 = -99.;
       fInteractionType 		 = -99.;
       fNuvtxx_truth 		 = -99.;
       fNuvtxy_truth 		 = -99.;
