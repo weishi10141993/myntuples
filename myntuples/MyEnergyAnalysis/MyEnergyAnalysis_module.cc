@@ -159,10 +159,10 @@ namespace lar {
 	    
       int fCCNC_truth;     		 //0=CC 1=NC
       int fMode_truth;     		 //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
-      int fInteractionType 		 // Interaction type
-      double fNuvtxx_truth 		 //Genie true neutrino interaction vertex x
-      double fNuvtxy_truth 		 //Genie true neutrino interaction vertex y
-      double fNuvtxz_truth  		 //Genie true neutrino interaction vertex z
+      int fInteractionType; 		 // Interaction type
+      double fNuvtxx_truth; 		 //Genie true neutrino interaction vertex x
+      double fNuvtxy_truth; 		 //Genie true neutrino interaction vertex y
+      double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
 	    
       double fGen_numu_E;                // Energy of generator level neutrino
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
