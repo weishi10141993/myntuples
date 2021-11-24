@@ -156,6 +156,14 @@ namespace lar {
       int fSim_nPionCharged;             // No. of Sim pi0
       int fSim_nNeutron;                 // No. of Sim neutrons
       int fSim_nProton;                  // No. of Sim protons
+	    
+      int fCCNC_truth;     		 //0=CC 1=NC
+      int fMode_truth;     		 //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
+      int fInteractionType 		 // Interaction type
+      double fNuvtxx_truth 		 //Genie true neutrino interaction vertex x
+      double fNuvtxy_truth 		 //Genie true neutrino interaction vertex y
+      double fNuvtxz_truth  		 //Genie true neutrino interaction vertex z
+	    
       double fGen_numu_E;                // Energy of generator level neutrino
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
@@ -250,6 +258,14 @@ namespace lar {
       fNtuple->Branch("Run",                      &fRun,                    "Run/I");
       // GEN neutrino E
       fNtuple->Branch("Gen_numu_E",               &fGen_numu_E,             "Gen_numu_E/D");
+      fNtuple->Branch("CCNC_truth",               &fCCNC_truth,             "CCNC_truth/I");
+      fNtuple->Branch("Mode_truth",               &fMode_truth,             "Mode_truth/I");
+      fNtuple->Branch("InteractionType",          &fInteractionType,         "InteractionType/I");
+      fNtuple->Branch("Nuvtxx_truth",             &fNuvtxx_truth,             "Nuvtxx_truth/D");
+      fNtuple->Branch("Nuvtxy_truth",             &fNuvtxy_truth,             "Nuvtxy_truth/D");
+      fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,             "Nuvtxz_truth/D");
+
+	    
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
       fNtuple->Branch("Sim_nNue",                 &fSim_nNue,               "Sim_nNue/I");
@@ -326,6 +342,12 @@ namespace lar {
 
       // Initialize
       fGen_numu_E                = -99.;
+      fCCNC_truth;     		 = -99.;
+      fMode_truth;     		 = -99.;
+      fInteractionType 		 = -99.;
+      fNuvtxx_truth 		 = -99.;
+      fNuvtxy_truth 		 = -99.;
+      fNuvtxz_truth  		 = -99.;
       fSim_numu_E                = -99.;
       fSim_mu_start_vx           = -99.;
       fSim_mu_start_vy           = -99.;
@@ -381,12 +403,12 @@ namespace lar {
       if ( mclist.size() ) 
       {
         fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
-        ccnc_truth   = mclist[0]->GetNeutrino().CCNC(); // CC or NC interaction
-      	mode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
-        interaction_type = mclist[0]->GetNeutrino().InteractionType() // Interaction type
-        nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
-	nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
-      	nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
+        fCCNC_truth   = mclist[0]->GetNeutrino().CCNC(); // CC or NC interaction
+      	fMode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
+        fInteractionType = mclist[0]->GetNeutrino().InteractionType() // Interaction type
+        fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
+	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+      	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
 
