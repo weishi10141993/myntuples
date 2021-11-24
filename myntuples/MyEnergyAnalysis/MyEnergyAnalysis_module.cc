@@ -385,7 +385,7 @@ namespace lar {
       	mode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
         interaction_type = mclist[0]->GetNeutrino().InteractionType() // Interaction type
         nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
-	      nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+	nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
