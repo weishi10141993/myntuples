@@ -44,7 +44,7 @@ source:
   maxEvents:  10
 
   # Include the name of an art::Event input file
-  fileNames: ["/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt*.root"]
+  fileNames: ["/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_*.root"]
 }
 
 
