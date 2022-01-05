@@ -341,38 +341,38 @@ namespace lar {
       fSubRun = event.subRun();
 
       // Initialize
-      fGen_numu_E                = -99.;
-      fCCNC_truth     		 = -99.;
-      fMode_truth     		 = -99.;
-      fInteractionType 		 = -99.;
-      fNuvtxx_truth 		 = -99.;
-      fNuvtxy_truth 		 = -99.;
-      fNuvtxz_truth  		 = -99.;
-      fSim_numu_E                = -99.;
-      fSim_mu_start_vx           = -99.;
-      fSim_mu_start_vy           = -99.;
-      fSim_mu_start_vz           = -99.;
-      fSim_mu_end_vx             = -99.;
-      fSim_mu_end_vy             = -99.;
-      fSim_mu_end_vz             = -99.;
-      fSim_mu_start_px           = -99.;
-      fSim_mu_start_py           = -99.;
-      fSim_mu_start_pz           = -99.;
-      fSim_mu_start_E            = -99.;
-      fSim_mu_end_px             = -99.;
-      fSim_mu_end_py             = -99.;
-      fSim_mu_end_pz             = -99.;
-      fSim_mu_end_E              = -99.;
-      fSim_mu_track_length       = -99.;
+      fGen_numu_E                = -9999.;
+      fCCNC_truth     		 = -9999.;
+      fMode_truth     		 = -9999.;
+      fInteractionType 		 = -9999.;
+      fNuvtxx_truth 		 = -9999.;
+      fNuvtxy_truth 		 = -9999.;
+      fNuvtxz_truth  		 = -9999.;
+      fSim_numu_E                = -9999.;
+      fSim_mu_start_vx           = -9999.;
+      fSim_mu_start_vy           = -9999.;
+      fSim_mu_start_vz           = -9999.;
+      fSim_mu_end_vx             = -9999.;
+      fSim_mu_end_vy             = -9999.;
+      fSim_mu_end_vz             = -9999.;
+      fSim_mu_start_px           = -9999.;
+      fSim_mu_start_py           = -9999.;
+      fSim_mu_start_pz           = -9999.;
+      fSim_mu_start_E            = -9999.;
+      fSim_mu_end_px             = -9999.;
+      fSim_mu_end_py             = -9999.;
+      fSim_mu_end_pz             = -9999.;
+      fSim_mu_end_E              = -9999.;
+      fSim_mu_track_length       = -9999.;
       fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
       fSim_hadronic_Edep_a2      = 0.;
       fSim_hadronic_Edep_b1      = 0.;
       fSim_hadronic_Edep_b2      = 0.;
       for (int i = 0; i < 4; i++) {
-        fSim_mu_start_4position[i] = -99.;
-        fSim_mu_end_4position[i]   = -99.;
-        fSim_mu_start_4mommenta[i] = -99.;
-        fSim_mu_end_4mommenta[i]   = -99.;
+        fSim_mu_start_4position[i] = -9999.;
+        fSim_mu_end_4position[i]   = -9999.;
+        fSim_mu_start_4mommenta[i] = -9999.;
+        fSim_mu_end_4mommenta[i]   = -9999.;
       }
       fSim_hadronic_hit_x_a.clear();
       fSim_hadronic_hit_y_a.clear();
