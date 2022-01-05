@@ -414,15 +414,11 @@ namespace lar {
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
 	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
+      	fNuPdg    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
+	fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
       
-      // Add the generator level PDG code
-      for(size_t i=0; i<truth.size(); i++)
-      {
-      	fNuPdg    = truth[i]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
-	fLepPDG     = truth[i]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
-      }
 	
 
       // Get all the simulated channels for the event. These channels
