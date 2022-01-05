@@ -185,6 +185,9 @@ namespace lar {
       double fSim_mu_end_E;              // Energy of leading mu
       double fSim_mu_end_4mommenta[4];   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
+	    
+      int fNuPdg;                        // Generator level neutrino PDG code
+      int fLepPDG;                        // Generator level outgoing lepton PDG code
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
@@ -264,7 +267,9 @@ namespace lar {
       fNtuple->Branch("Nuvtxx_truth",             &fNuvtxx_truth,             "Nuvtxx_truth/D");
       fNtuple->Branch("Nuvtxy_truth",             &fNuvtxy_truth,             "Nuvtxy_truth/D");
       fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,             "Nuvtxz_truth/D");
-
+      // Generator level PDG code
+      fNtuple->->Branch("LepPDG",        	  &fLepPDG,     	    "LepPDG/I");
+      fNtuple->Branch("neu",         		  &fNuPdg,        	    "neu/I");
 	    
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
@@ -411,6 +416,14 @@ namespace lar {
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
+      
+      // Add the generator level PDG code
+      for(size_t i=0; i<truth.size(); i++)
+      {
+      	fNuPdg    = truth[i]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
+	fLepPDG     = truth[i]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+      }
+	
 
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
