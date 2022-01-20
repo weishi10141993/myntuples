@@ -269,7 +269,7 @@ namespace lar {
       fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,             "Nuvtxz_truth/D");
       // Generator level PDG code
       fNtuple->Branch("LepPDG",        	  &fLepPDG,     	    "LepPDG/I");
-      fNtuple->Branch("neu",         		  &fNuPdg,        	    "neu/I");
+      fNtuple->Branch("neuPDG",         		  &fNuPdg,        	    "neuPDG/I");
 	    
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
