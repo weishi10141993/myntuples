@@ -56,6 +56,9 @@ If changed ```MyEnergyAnalysis_module.cc```, recompile the code (do the setup ab
 cd ${MRB_BUILDDIR}                        # Go to your build directory
 mrb z                                     # Remove old build directory
 mrbsetenv                                 # Create the bookkeeping files needed to compile programs.
+# On dunegpvm
+mrb b
+# On ivy
 mrb install                               # Compile the code in ${MRB_SOURCE} and put the results in ${MRB_INSTALL}
 ```
 
