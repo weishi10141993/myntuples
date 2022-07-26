@@ -27,8 +27,7 @@ mrb uc                                                                  # Tell m
 cd ${MRB_BUILDDIR}                                                      # Go to your build directory
 mrb z
 mrbsetenv                                                               # Create the bookkeeping files needed to compile programs.
-mrb install                                                             # Compile the code in ${MRB_SOURCE} and put the results in ${MRB_INSTALL}
-# In case "mrb install" doesn't work, try: mrb b
+mrb b                                                                   # Compile the code in ${MRB_SOURCE} 
 ```
 
 To run on FD MC files, this produces a ROOT nTuple:
