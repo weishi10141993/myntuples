@@ -156,14 +156,14 @@ namespace lar {
       int fSim_nPionCharged;             // No. of Sim pi0
       int fSim_nNeutron;                 // No. of Sim neutrons
       int fSim_nProton;                  // No. of Sim protons
-	    
+
       int fCCNC_truth;     		 //0=CC 1=NC
       int fMode_truth;     		 //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
       int fInteractionType; 		 // Interaction type
       double fNuvtxx_truth; 		 //Genie true neutrino interaction vertex x
       double fNuvtxy_truth; 		 //Genie true neutrino interaction vertex y
       double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
-	    
+
       double fGen_numu_E;                // Energy of generator level neutrino
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
@@ -185,7 +185,7 @@ namespace lar {
       double fSim_mu_end_E;              // Energy of leading mu
       double fSim_mu_end_4mommenta[4];   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
-	    
+
       int fNuPdg;                        // Generator level neutrino PDG code
       int fLepPDG;                        // Generator level outgoing lepton PDG code
       // Two ways (a, b) to access collection plane +
@@ -270,7 +270,7 @@ namespace lar {
       // Generator level PDG code
       fNtuple->Branch("LepPDG",        	  &fLepPDG,     	    "LepPDG/I");
       fNtuple->Branch("neuPDG",         		  &fNuPdg,        	    "neuPDG/I");
-	    
+
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
       fNtuple->Branch("Sim_nNue",                 &fSim_nNue,               "Sim_nNue/I");
@@ -405,21 +405,21 @@ namespace lar {
       // There could be more than one MCTruth, e.g., you might have multiple neutrino interactions per spill,
       // in which case you’d run GENIE multiple times and have one MCTruth per interaction.
       // Or you might want one MCTruth information for the GENIE event and another that overlays cosmic simulation or data onto the same event
-      if ( mclist.size() ) 
+      if ( mclist.size() )
       {
         fGen_numu_E = mclist[0]->GetNeutrino().Nu().E(); // true neutrino energy
         fCCNC_truth   = mclist[0]->GetNeutrino().CCNC(); // CC or NC interaction
       	fMode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
         fInteractionType = mclist[0]->GetNeutrino().InteractionType(); // Interaction type
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
-	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+	      fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       	fNuPdg    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
-	fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
-      
-	
+
+
 
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
