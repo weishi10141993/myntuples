@@ -27,7 +27,7 @@ mrb uc                                                                  # Tell m
 cd ${MRB_BUILDDIR}                                                      # Go to your build directory
 mrb z
 mrbsetenv                                                               # Create the bookkeeping files needed to compile programs.
-mrb b                                                                   # Compile the code in ${MRB_SOURCE} 
+mrb b                                                                   # Compile the code in ${MRB_SOURCE}
 ```
 
 To run on FD MC files, this produces a ROOT nTuple:
@@ -80,7 +80,7 @@ cd /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19
 cp setup setup-grid         # make a copy of the setup for grid job
 ```
 
-then change ```/dune/app/users/weishi``` to ```${INPUT_TAR_DIR_LOCAL}```.
+then change ```/dune/app/users/weishi``` to ```${_CONDOR_JOB_IWD}```.
 
 ```
 cd /dune/app/users/weishi
@@ -100,7 +100,7 @@ jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.1GB --expected-lifetime=10
 
 Here are some reference settings:
 
-100 events (1 file): ```--memory=338.3MB --disk=0.0GB --expected-lifetime=1m21s --cpu=1```
+100 events (1 file): ```--memory=568MB --disk=0.1GB --expected-lifetime=16m --cpu=1```
 
 10k events (100 files): ```--memory=?MB --disk=?GB --expected-lifetime=?h --cpu=?```
 
