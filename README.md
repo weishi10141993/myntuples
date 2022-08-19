@@ -73,6 +73,8 @@ git push
 
 ## Run grid jobs
 
+The instruction is based on the [DUNE computing tutorial](https://wiki.dunescience.org/wiki/DUNE_Computing/Submitting_grid_jobs_May2021#Submit_a_job).
+
 Once the above is compiled and runs without problem interactively, you can start to produce a tarball. First, you need to have a grid setup for the localProducts as the grid job typically runs on a different machine than your working machine,
 
 ```
@@ -80,31 +82,39 @@ cd /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19
 cp setup setup-grid         # make a copy of the setup for grid job
 ```
 
-then change ```/dune/app/users/weishi``` to ```${_CONDOR_JOB_IWD}```.
+then in ```setup-grid```, change ```/dune/app/users/weishi``` to the worker node working directory ```${_CONDOR_JOB_IWD}```.
+
+Now get grid job set up scripts and txt file that lists of input files:
 
 ```
 cd /dune/app/users/weishi
-# Get job set up scripts
 wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/setupFDEffTarBall-grid.sh --no-check-certificate
-wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall.sh --no-check-certificate
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall_grid.sh --no-check-certificate
+cp /dune/app/users/weishi/MCC11FDBeamsim_nu_reco.txt .
+```
 
-# Now make the tarball
-tar -czvf FDEff.tar.gz FDEff setupFDEffTarBall-grid.sh
+At the top of ```run_FDEffTarBall_grid.sh```, you can set these variables:
+```
+Number of input files to run: STARTLINE, ENDLINE
+Output directory: OUTDIR
+```
+
+Now make the tarball,
+```
+tar -czvf FDEff.tar.gz FDEff setupFDEffTarBall-grid.sh MCC11FDBeamsim_nu_reco.txt
 
 # Check the tarball *.tar.gz is indeed created and open with: tar -xf *.tar.gz
 ```
 
+Finally you can submit the job,
 ```
-jobsub_submit -G dune -M -N 1 --memory=500MB --disk=0.1GB --expected-lifetime=10m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_FDEffTarBall.sh
+jobsub_submit -G dune -M -N 1 --memory=1000MB --disk=1GB --expected-lifetime=30m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/weishi/FDEff.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/weishi/run_FDEffTarBall_grid.sh
 ```
 
 Here are some reference settings:
 
 100 events (1 file): ```--memory=568MB --disk=0.1GB --expected-lifetime=16m --cpu=1```
-
-10k events (100 files): ```--memory=?MB --disk=?GB --expected-lifetime=?h --cpu=?```
-
-Default: ```--memory=2000MB --disk=10GB --expected-lifetime=8h --cpu=1```.
+300 events (3 file): ```--memory=665MB --disk=0.1GB --expected-lifetime=25m --cpu=1```
 
 To check job status,
 
@@ -118,18 +128,6 @@ To fetch job output,
 ```
 jobsub_fetchlog --jobid=<id> --unzipdir=<dir>
 ```
-
-The output is in the scratch area ```/pnfs/dune/scratch/users/weishi/myFDntuples``` as specified in ```run_FDEffTarBall.sh```.
-
-```
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup jobsub_client
-
-# Need to prestage files from tape
-samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
-```
-
-This instruction is based on the [DUNE computing tutorial](https://wiki.dunescience.org/wiki/DUNE_Computing/Submitting_grid_jobs_May2021#Submit_a_job).
 
 ### Use SAM to navigate files
 
@@ -152,6 +150,13 @@ for k in `samweb list-files defname: prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco 
 
 Other SAM functions: https://wiki.dunescience.org/wiki/DUNE_Computing/Main_resources_Jan2021#Data_management:_best_practices
 
+```
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup jobsub_client
+
+# Need to prestage files from tape
+samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
+```
 
 ## NN group machine environment setup:
 
