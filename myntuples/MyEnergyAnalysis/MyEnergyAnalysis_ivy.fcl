@@ -44,8 +44,19 @@ source:
   maxEvents:  10
 
   # Include the name of an art::Event input file
-  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/21/anu_dune10kt_1x2x6_12855791_0_20181104T211348_gen_g4_detsim_reco.root",
-              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/31/11/nu_dune10kt_1x2x6_13009312_0_20181104T221530_gen_g4_detsim_reco.root"]
+  fileNames: 
+  [
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422341_0_20181123T225730_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422362_0_20181123T225714_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422363_0_20181123T225713_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422364_0_20181123T225713_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422368_0_20181123T225715_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422379_0_20181123T225714_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422391_0_20181123T225718_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422516_0_20181123T230449_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13422524_0_20181123T230357_gen_g4_detsim_reco.root",
+  "/storage/shared/cvilela/DUNE_FD_MC/nu_dune10kt_1x2x6_13433521_0_20181124T082555_gen_g4_detsim_reco.root"
+  ]
 }
 
 
