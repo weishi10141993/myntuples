@@ -142,6 +142,7 @@ namespace lar {
 
       // Add true nu information
       double fLepE;                      // Generator level neutrino lepton energy
+      int nPi0;
       double eP, eN, ePip, ePim, ePi0, eOther;
       double E_vis_true;
       //
@@ -271,6 +272,7 @@ namespace lar {
       fNtuple->Branch("ePim",      &ePim,       "ePim/D");
       fNtuple->Branch("ePi0",      &ePi0,       "ePi0/D");
       fNtuple->Branch("eOther",    &eOther,     "eOther/D");
+      fNtuple->Branch("nipi0",     &nPi0,       "nipi0/I");
       fNtuple->Branch("E_vis_true",    &E_vis_true,     "E_vis_true/D");
 
       // GEN neutrino E
@@ -436,6 +438,7 @@ namespace lar {
 
 
       // Add true particle counts
+      nPi0 = 0;
       eP = 0.;
       eN = 0.;
       ePip = 0.;
@@ -466,6 +469,7 @@ namespace lar {
           }
           else if ( pdg == 111 ) // kPdgPi0
           {
+            nPi0++;
             ePi0 += ke;
           }
           else if ( pdg == 321 || pdg == -321 || pdg == 311 || pdg == -311 || pdg == 130 || pdg == 310 || pdg == 22 || (pdg>=100 && pdg<=9999) || (pdg>=-9999 && pdg<=-100)) // kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
@@ -477,7 +481,7 @@ namespace lar {
 
       // True visible energy:
       double pi0_mass = 135.0; // MeV
-      E_vis_true = LepE + eP + ePip + ePim + ePi0 + eOther + nipi0 * 135;
+      E_vis_true = fLepE + eP + ePip + ePim + ePi0 + eOther + nipi0 * pi0_mass;
 
 
 
