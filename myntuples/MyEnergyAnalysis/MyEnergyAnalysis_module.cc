@@ -480,7 +480,7 @@ namespace lar {
       }
 
       // True visible energy:
-      double pi0_mass = 135.0; // MeV
+      double pi0_mass = 0.135; // GeV
       E_vis_true = fLepE + eP + ePip + ePim + ePi0 + eOther + nPi0 * pi0_mass;
 
 
