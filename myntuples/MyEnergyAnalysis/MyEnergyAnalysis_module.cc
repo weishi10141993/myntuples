@@ -140,6 +140,10 @@ namespace lar {
       int fRun;    // number of the run being processed
       int fSubRun; // number of the sub-run being processed
 
+      // Add true nu information
+      double fLepE;                      // Generator level neutrino lepton energy
+      double eP, eN, ePip, ePim, ePi0, eOther;
+
       //
       // Variables related to geneator/simulation
       //
@@ -259,6 +263,14 @@ namespace lar {
       fNtuple->Branch("Event",                    &fEvent,                  "Event/I");
       fNtuple->Branch("SubRun",                   &fSubRun,                 "SubRun/I");
       fNtuple->Branch("Run",                      &fRun,                    "Run/I");
+      // Add true nu information
+      fNtuple->Branch("LepE",         &fLepE,         "LepE/D");
+      fNtuple->Branch("eP",        &eP,         "eP/D");
+      fNtuple->Branch("eN",        &eN,         "eN/D");
+      fNtuple->Branch("ePip",      &ePip,       "ePip/D");
+      fNtuple->Branch("ePim",      &ePim,       "ePim/D");
+      fNtuple->Branch("ePi0",      &ePi0,       "ePi0/D");
+      fNtuple->Branch("eOther",    &eOther,     "eOther/D");
       // GEN neutrino E
       fNtuple->Branch("Gen_numu_E",               &fGen_numu_E,             "Gen_numu_E/D");
       fNtuple->Branch("CCNC_truth",               &fCCNC_truth,             "CCNC_truth/I");
@@ -416,8 +428,30 @@ namespace lar {
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       	fNuPdg    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
 	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+        fLepE       = mclist[0]->GetNeutrino().Lepton().Momentum().T(); // Generator level neutrino lepton energy
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
+
+
+      // Add true particle counts
+      eP = 0.;
+      eN = 0.;
+      ePip = 0.;
+      ePim = 0.;
+      ePi0 = 0.;
+      eOther = 0.;
+      if ( mclist.size() )
+      {
+        if(mclist[0]->NParticles())
+        {
+          int pdg = mclist[0]->GetParticle(p).PdgCode();
+          double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
+          if (pdg == genie::kPdgProton)
+          {
+            eP += ke;
+          }
+        }
+      }
 
 
 
