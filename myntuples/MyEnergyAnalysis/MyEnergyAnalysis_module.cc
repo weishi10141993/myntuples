@@ -440,7 +440,7 @@ namespace lar {
       ePim = 0.;
       ePi0 = 0.;
       eOther = 0.;
-      if ( int p = 0; p < mclist[0]->NParticles(); p++ )
+      for ( int p = 0; p < mclist[0]->NParticles(); p++ )
       {
         if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
         {
