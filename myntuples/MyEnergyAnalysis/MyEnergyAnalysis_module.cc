@@ -143,7 +143,7 @@ namespace lar {
       // Add true nu information
       double fLepE;                      // Generator level neutrino lepton energy
       double eP, eN, ePip, ePim, ePi0, eOther;
-
+      double E_vis_true;
       //
       // Variables related to geneator/simulation
       //
@@ -271,6 +271,8 @@ namespace lar {
       fNtuple->Branch("ePim",      &ePim,       "ePim/D");
       fNtuple->Branch("ePi0",      &ePi0,       "ePi0/D");
       fNtuple->Branch("eOther",    &eOther,     "eOther/D");
+      fNtuple->Branch("E_vis_true",    &E_vis_true,     "E_vis_true/D");
+
       // GEN neutrino E
       fNtuple->Branch("Gen_numu_E",               &fGen_numu_E,             "Gen_numu_E/D");
       fNtuple->Branch("CCNC_truth",               &fCCNC_truth,             "CCNC_truth/I");
@@ -472,6 +474,10 @@ namespace lar {
           }
         }
       }
+
+      // True visible energy:
+      double pi0_mass = 135.0; // MeV
+      E_vis_true = LepE + eP + ePip + ePim + ePi0 + eOther + nipi0 * 135;
 
 
 
