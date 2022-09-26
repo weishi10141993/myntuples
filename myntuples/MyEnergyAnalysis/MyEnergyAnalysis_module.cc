@@ -444,8 +444,8 @@ namespace lar {
       {
         if(mclist[0]->NParticles())
         {
-          int pdg = mclist[0]->GetParticle(p).PdgCode();
-          double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
+          int pdg = mclist[0]->GetParticle().PdgCode();
+          double ke = mclist[0]->GetParticle().E() - mclist[0]->GetParticle(p).Mass();
           if ( pdg == genie::kPdgProton )
           {
             eP += ke;
