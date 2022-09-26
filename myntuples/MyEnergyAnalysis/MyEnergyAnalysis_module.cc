@@ -31,6 +31,15 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Utilities/Exception.h"
 
+// pdg
+#include "Framework/ParticleData/PDGCodes.h"
+#include "Framework/ParticleData/PDGUtils.h"
+#include "Framework/ParticleData/PDGLibrary.h"
+
+// genie
+#include "Framework/EventGen/EventRecord.h"
+#include "Framework/GHEP/GHepParticle.h"
+
 // Utility libraries
 #include "cetlib/pow.h" // cet::sum_of_squares()
 #include "fhiclcpp/types/Atom.h"
@@ -445,7 +454,7 @@ namespace lar {
         if(mclist[0]->NParticles())
         {
           int pdg = mclist[0]->GetParticle().PdgCode();
-          double ke = mclist[0]->GetParticle().E() - mclist[0]->GetParticle(p).Mass();
+          double ke = mclist[0]->GetParticle().E() - mclist[0]->GetParticle().Mass();
           if ( pdg == genie::kPdgProton )
           {
             eP += ke;
