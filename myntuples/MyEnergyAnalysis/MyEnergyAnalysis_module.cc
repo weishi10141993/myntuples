@@ -440,33 +440,33 @@ namespace lar {
       ePim = 0.;
       ePi0 = 0.;
       eOther = 0.;
-      if ( mclist.size() )
+      if ( int p = 0; p < mclist[0]->NParticles(); p++ )
       {
-        if(mclist[0]->NParticles())
+        if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
         {
-          int pdg = mclist[0]->GetParticle().PdgCode();
-          double ke = mclist[0]->GetParticle().E() - mclist[0]->GetParticle().Mass();
-          if ( pdg == 2212 )
+          int pdg = mclist[0]->GetParticle(p).PdgCode();
+          double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
+          if ( pdg == 2212 ) // kPdgProton
           {
             eP += ke;
           }
-          else if ( pdg == 2112 )
+          else if ( pdg == 2112 ) // kPdgNeutron
           {
             eN += ke;
           }
-          else if ( pdg == 211 )
+          else if ( pdg == 211 ) // kPdgPiP
           {
             ePip += ke;
           }
-          else if ( pdg == -211 )
+          else if ( pdg == -211 ) // kPdgPiM
           {
             ePim += ke;
           }
-          else if ( pdg == 111 )
+          else if ( pdg == 111 ) // kPdgPi0
           {
             ePi0 += ke;
           }
-          else if ( pdg == 321 )
+          else if ( pdg == 321 || pdg == -321 || pdg == 311 || pdg == -311 || pdg == 130 || pdg == 310 || pdg == 22 || (pdg>=100 && pdg<=9999) || (pdg>=-9999 && pdg<=-100)) // kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
           {
             eOther += ke;
           }
