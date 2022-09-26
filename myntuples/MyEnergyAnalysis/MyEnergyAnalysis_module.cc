@@ -440,18 +440,18 @@ namespace lar {
       ePim = 0.;
       ePi0 = 0.;
       eOther = 0.;
-      if ( mclist.size() )
-      {
-        if(mclist[0]->NParticles())
-        {
-          int pdg = mclist[0]->GetParticle(p).PdgCode();
-          double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
-          if (pdg == genie::kPdgProton)
-          {
-            eP += ke;
-          }
-        }
-      }
+      // if ( mclist.size() )
+      // {
+      //   if(mclist[0]->NParticles())
+      //   {
+      //     int pdg = mclist[0]->GetParticle(p).PdgCode();
+      //     double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
+      //     if (pdg == genie::kPdgProton)
+      //     {
+      //       eP += ke;
+      //     }
+      //   }
+      // }
 
 
 
