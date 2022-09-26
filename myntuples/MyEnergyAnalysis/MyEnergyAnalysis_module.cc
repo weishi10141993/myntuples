@@ -31,15 +31,6 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Utilities/Exception.h"
 
-// pdg
-#include "Framework/ParticleData/PDGCodes.h"
-#include "Framework/ParticleData/PDGUtils.h"
-#include "Framework/ParticleData/PDGLibrary.h"
-
-// genie
-#include "Framework/EventGen/EventRecord.h"
-#include "Framework/GHEP/GHepParticle.h"
-
 // Utility libraries
 #include "cetlib/pow.h" // cet::sum_of_squares()
 #include "fhiclcpp/types/Atom.h"
@@ -455,27 +446,27 @@ namespace lar {
         {
           int pdg = mclist[0]->GetParticle().PdgCode();
           double ke = mclist[0]->GetParticle().E() - mclist[0]->GetParticle().Mass();
-          if ( pdg == genie::kPdgProton )
+          if ( pdg == 2212 )
           {
             eP += ke;
           }
-          else if ( pdg == genie::kPdgNeutron )
+          else if ( pdg == 2112 )
           {
             eN += ke;
           }
-          else if ( pdg == genie::kPdgPiP )
+          else if ( pdg == 211 )
           {
             ePip += ke;
           }
-          else if ( pdg == genie::kPdgPiM )
+          else if ( pdg == -211 )
           {
             ePim += ke;
           }
-          else if ( pdg == genie::kPdgPi0 )
+          else if ( pdg == 111 )
           {
             ePi0 += ke;
           }
-          else if ( pdg == genie::kPdgKP )
+          else if ( pdg == 321 )
           {
             eOther += ke;
           }
