@@ -142,9 +142,9 @@ namespace lar {
 
       // Add true nu information
       double fLepE;                      // Generator level neutrino lepton energy
-      int nPi0;
-      double eP, eN, ePip, ePim, ePi0, eOther;
-      double E_vis_true;
+      int nPi0;                          // # of Pi0
+      double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
+      double E_vis_true;                 // True vis energy
       //
       // Variables related to geneator/simulation
       //
