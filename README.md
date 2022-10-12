@@ -291,7 +291,8 @@ Then to locate full directory of each file:
 samweb get-file-access-url nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root --schema=root
 ```
 It returns the full url for you to copy/read, e.g.,
-```root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
 ```
 
 You can run lar directly on the url:
