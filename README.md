@@ -269,31 +269,52 @@ From NN group machine:
 
 ## Locate files with SAM
 
+Set up [SAM](https://dune.github.io/computing-training-basics/03-data-management/index.html)
+
 ```
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup sam_web_client
 export SAM_EXPERIMENT=dune
 kx509
+```
 
-# Find 'dimensions' of the sample from https://dune-data.fnal.gov/mc/mcc11/index.html
-# For example, the following is for the FD nutau reco sample
+Then find 'dimensions' of the sample from [MCC11](https://dune-data.fnal.gov/mc/mcc11/index.html). For example, the following is for the FD nutau reco sample
+
+```
 samweb list-files "file_type mc and dune.campaign mcc11 and data_tier 'full-reconstructed' and application reco and version v07_06_02 and file_name nutau_%"
-# This returns a list of files saved here: /dune/app/users/weishi/MCC11FDBeamsim_nutau_reco.txt
+```
 
-# Then to locate full directory of each file 
+This returns a list of files saved here: ```/dune/app/users/weishi/MCC11FDBeamsim_nutau_reco.txt```.
+
+Then to locate full directory of each file:
+```
 samweb get-file-access-url nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root --schema=root
-# It returns the full url for you to copy/read: 
-root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
-# To copy the file to your directory
+```
+It returns the full url for you to copy/read, e.g.,
+```root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+
+You can run lar directly on the url:
+```
+lar -c <your fcl file>.fcl -n -1 root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+
+To copy the file to your directory:
+```
 setup ifdhc
 ifdh cp -D root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root <your directory>
+```
 
-# Another way to locate file
+Another way to locate file:
+```
 samweb locate-file nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
-# This tells you the locations
+```
+It tells you all the locations, e.g.,
+```
 enstore:/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12(14064@vr0423m8)
-# it's not recommended to copy/read files via pnfs this way, use the root:// access url above
-# in case the url doesn't work, try this
+```
+But it's not recommended to copy/read files via pnfs this way, use the root access url above. In case the url doesn't work, try this:
+```
 cp /pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root <your directory>
 ```
 
