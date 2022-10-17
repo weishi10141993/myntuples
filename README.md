@@ -142,9 +142,9 @@ To fetch job output,
 jobsub_fetchlog --jobid=<id> --unzipdir=<dir>
 ```
 
-### Use SAM to navigate files
+### Locate files with SAM
 
-To get a list of all files in DUNE dataset, use SAM:
+To get a list of all files in DUNE dataset, use [SAM](https://dune.github.io/computing-training-basics/03-data-management/index.html):
 
 ```
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
@@ -161,6 +161,39 @@ Or list 100 files in the dataset, do this at command line:
 for k in `samweb list-files defname: prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco with limit 100`; do samweb get-file-access-url --schema root $k; done
 ```
 
+You can also find 'dimensions' of the sample from [MCC11](https://dune-data.fnal.gov/mc/mcc11/index.html). For example, the following is for the FD nutau reco sample
+
+```
+samweb list-files "file_type mc and dune.campaign mcc11 and data_tier 'full-reconstructed' and application reco and version v07_06_02 and file_name nutau_%"
+```
+
+This returns a list of files saved here: ```/dune/app/users/weishi/MCC11FDBeamsim_nutau_reco.txt```.
+
+Then to locate full directory of each file:
+```
+samweb get-file-access-url nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root --schema=root
+```
+It returns the full url, e.g.,
+```
+root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+
+You can run ```lar``` directly on the url or open it via ROOT (no need to copy it):
+```
+lar -c <your fcl file>.fcl -n -1 root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+
+root -l root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+
+Another way to locate file:
+```
+samweb locate-file nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
+```
+It tells you all the locations, e.g.,
+```
+enstore:/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12(14064@vr0423m8)
+```
+
 Other SAM functions: https://wiki.dunescience.org/wiki/DUNE_Computing/Main_resources_Jan2021#Data_management:_best_practices
 
 ```
@@ -170,6 +203,19 @@ setup jobsub_client
 # Need to prestage files from tape
 samweb prestage-dataset --defname='prodgenie_nu_dune10kt_1x2x6_mcc11_lbl_reco' --parallel=6
 ```
+
+Some samples are on tape, you can't access unless you prestage it first (may take time): https://dune.github.io/computing-training-basics/07-grid-job-submission/index.html
+
+```
+samweb prestage-dataset --defname='protodune-sp_runse6201_reco_v09_09_01_v0'
+```
+
+A better way to prestage is to instead do
+```
+unsetup curl # necessary as of May 2022 because there's an odd interaction with the UPS version of curl, so we need to turn it off
+samweb run-project --defname=kherner-may2022tutorial-mc --schema https 'echo %fileurl && curl -L --cert $X509_USER_PROXY --key $X509_USER_PROXY --cacert $X509_USER_PROXY --capath /etc/grid-security/certificates -H "Range: bytes=0-3" %fileurl && echo'
+```
+
 
 ## NN group machine environment setup:
 
@@ -266,58 +312,6 @@ From NN group machine:
 * FD MC files: ```/storage/shared/cvilela/DUNE_FD_MC```
 
 * On-axis ND CAFs to calculate the geometric efficiency correction for ND events: ```/storage/shared/cvilela/CAF/ND_v7```
-
-## Locate files with SAM
-
-Set up [SAM](https://dune.github.io/computing-training-basics/03-data-management/index.html)
-
-```
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup sam_web_client
-export SAM_EXPERIMENT=dune
-kx509
-```
-
-Then find 'dimensions' of the sample from [MCC11](https://dune-data.fnal.gov/mc/mcc11/index.html). For example, the following is for the FD nutau reco sample
-
-```
-samweb list-files "file_type mc and dune.campaign mcc11 and data_tier 'full-reconstructed' and application reco and version v07_06_02 and file_name nutau_%"
-```
-
-This returns a list of files saved here: ```/dune/app/users/weishi/MCC11FDBeamsim_nutau_reco.txt```.
-
-Then to locate full directory of each file:
-```
-samweb get-file-access-url nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root --schema=root
-```
-It returns the full url for you to copy/read, e.g.,
-```
-root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
-```
-
-You can run lar directly on the url:
-```
-lar -c <your fcl file>.fcl -n -1 root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
-```
-
-To copy the file to your directory:
-```
-setup ifdhc
-ifdh cp -D root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root <your directory>
-```
-
-Another way to locate file:
-```
-samweb locate-file nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root
-```
-It tells you all the locations, e.g.,
-```
-enstore:/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12(14064@vr0423m8)
-```
-But it's not recommended to copy/read files via pnfs this way, use the root access url above. In case the url doesn't work, try this:
-```
-cp /pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/08/65/76/12/nutau_dune10kt_1x2x6_12855916_0_20181104T221500_gen_g4_detsim_reco.root <your directory>
-```
 
 ## ND Geometry Efficiency
 
