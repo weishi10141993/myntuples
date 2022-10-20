@@ -144,7 +144,7 @@ namespace lar {
       double fLepE;                      // Generator level neutrino lepton energy
       int nPi0;                          // # of Pi0
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
-      double E_vis_true;                 // True vis energy
+      double E_vis_true;                 // True vis energy [GeV]
       //
       // Variables related to geneator/simulation
       //
@@ -169,7 +169,7 @@ namespace lar {
       double fNuvtxy_truth; 		 //Genie true neutrino interaction vertex y
       double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
 
-      double fGen_numu_E;                // Energy of generator level neutrino
+      double fGen_numu_E;                // Energy of generator level neutrino [GeV]
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
       double fSim_mu_start_vy;           // y .....................................
