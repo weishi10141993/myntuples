@@ -141,7 +141,7 @@ namespace lar {
       int fSubRun; // number of the sub-run being processed
 
       // Add true nu information
-      double fLepE;                      // Generator level neutrino lepton energy
+      double fLepE;                      // Generator level neutrino lepton energy [GeV]
       int nPi0;                          // # of Pi0
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
       double E_vis_true;                 // True vis energy [GeV]
@@ -191,8 +191,13 @@ namespace lar {
       double fSim_mu_end_4mommenta[4];   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
 
+      double fSim_mu_Edep_a1;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
+      double fSim_mu_Edep_a2;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
+      double fSim_mu_Edep_b1;                // [GeV]
+      double fSim_mu_Edep_b2;                // [MeV]
+
       int fNuPdg;                        // Generator level neutrino PDG code
-      int fLepPDG;                        // Generator level outgoing lepton PDG code
+      int fLepPDG;                       // Generator level outgoing lepton PDG code
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
@@ -265,27 +270,27 @@ namespace lar {
       fNtuple->Branch("SubRun",                   &fSubRun,                 "SubRun/I");
       fNtuple->Branch("Run",                      &fRun,                    "Run/I");
       // Add true nu information
-      fNtuple->Branch("LepE",         &fLepE,         "LepE/D");
-      fNtuple->Branch("eP",        &eP,         "eP/D");
-      fNtuple->Branch("eN",        &eN,         "eN/D");
-      fNtuple->Branch("ePip",      &ePip,       "ePip/D");
-      fNtuple->Branch("ePim",      &ePim,       "ePim/D");
-      fNtuple->Branch("ePi0",      &ePi0,       "ePi0/D");
-      fNtuple->Branch("eOther",    &eOther,     "eOther/D");
-      fNtuple->Branch("nipi0",     &nPi0,       "nipi0/I");
-      fNtuple->Branch("E_vis_true",    &E_vis_true,     "E_vis_true/D");
+      fNtuple->Branch("LepE",          &fLepE,         "LepE/D");
+      fNtuple->Branch("eP",            &eP,            "eP/D");
+      fNtuple->Branch("eN",            &eN,            "eN/D");
+      fNtuple->Branch("ePip",          &ePip,          "ePip/D");
+      fNtuple->Branch("ePim",          &ePim,          "ePim/D");
+      fNtuple->Branch("ePi0",          &ePi0,          "ePi0/D");
+      fNtuple->Branch("eOther",        &eOther,        "eOther/D");
+      fNtuple->Branch("nipi0",         &nPi0,          "nipi0/I");
+      fNtuple->Branch("E_vis_true",    &E_vis_true,    "E_vis_true/D");
 
       // GEN neutrino E
       fNtuple->Branch("Gen_numu_E",               &fGen_numu_E,             "Gen_numu_E/D");
       fNtuple->Branch("CCNC_truth",               &fCCNC_truth,             "CCNC_truth/I");
       fNtuple->Branch("Mode_truth",               &fMode_truth,             "Mode_truth/I");
-      fNtuple->Branch("InteractionType",          &fInteractionType,         "InteractionType/I");
-      fNtuple->Branch("Nuvtxx_truth",             &fNuvtxx_truth,             "Nuvtxx_truth/D");
-      fNtuple->Branch("Nuvtxy_truth",             &fNuvtxy_truth,             "Nuvtxy_truth/D");
-      fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,             "Nuvtxz_truth/D");
+      fNtuple->Branch("InteractionType",          &fInteractionType,        "InteractionType/I");
+      fNtuple->Branch("Nuvtxx_truth",             &fNuvtxx_truth,           "Nuvtxx_truth/D");
+      fNtuple->Branch("Nuvtxy_truth",             &fNuvtxy_truth,           "Nuvtxy_truth/D");
+      fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,           "Nuvtxz_truth/D");
       // Generator level PDG code
-      fNtuple->Branch("LepPDG",        	  &fLepPDG,     	    "LepPDG/I");
-      fNtuple->Branch("neuPDG",         		  &fNuPdg,        	    "neuPDG/I");
+      fNtuple->Branch("LepPDG",        	          &fLepPDG,     	          "LepPDG/I");
+      fNtuple->Branch("neuPDG",         	     	  &fNuPdg,             	    "neuPDG/I");
 
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
@@ -322,6 +327,11 @@ namespace lar {
       fNtuple->Branch("Sim_mu_start_4mommenta",    fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
       fNtuple->Branch("Sim_mu_end_4mommenta",      fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
       fNtuple->Branch("Sim_mu_track_length",      &fSim_mu_track_length,    "Sim_mu_track_length/D");
+      fNtuple->Branch("Sim_mu_Edep_a1",              &fSim_mu_Edep_a1,            "Sim_mu_Edep_a1/D");
+      fNtuple->Branch("Sim_mu_Edep_a2",              &fSim_mu_Edep_a2,            "Sim_mu_Edep_a2/D");
+      fNtuple->Branch("Sim_mu_Edep_b1",              &fSim_mu_Edep_b1,            "Sim_mu_Edep_b1/D");
+      fNtuple->Branch("Sim_mu_Edep_b2",              &fSim_mu_Edep_b2,            "Sim_mu_Edep_b2/D");
+
       fNtuple->Branch("Sim_hadronic_Edep_a1",     &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
       fNtuple->Branch("Sim_hadronic_Edep_a2",     &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
       fNtuple->Branch("Sim_n_hadronic_Edep_a",    &fSim_n_hadronic_Edep_a,  "Sim_n_hadronic_Edep_a/I");
@@ -385,6 +395,12 @@ namespace lar {
       fSim_mu_end_pz             = -9999.;
       fSim_mu_end_E              = -9999.;
       fSim_mu_track_length       = -9999.;
+
+      fSim_mu_Edep_a1 = 0.;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
+      fSim_mu_Edep_a2 = 0.;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
+      fSim_mu_Edep_b1 = 0.;
+      fSim_mu_Edep_b2 = 0.;
+
       fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
       fSim_hadronic_Edep_a2      = 0.;
       fSim_hadronic_Edep_b1      = 0.;
@@ -629,7 +645,8 @@ namespace lar {
 
           // An "energy deposit" object stores how much charge/energy was deposited in a small volume, by which particle, and where.
           // The type of 'energyDeposit' will be sim::IDE, here use auto.
-          for ( auto const& energyDeposit : energyDeposits ) {
+          for ( auto const& energyDeposit : energyDeposits )
+          {
 
             auto search = particleMap.find( energyDeposit.trackID );
             if ( search == particleMap.end() ) continue;
@@ -637,8 +654,29 @@ namespace lar {
             // "search" points to a pair in the map: <track ID, MCParticle*>
             const simb::MCParticle& particle = *((*search).second);
 
+            // Deposit energy for muon
+            if ( particle.Process() == "primary" && abs(particle.PdgCode()) == 13 )
+            {
+              // Method a
+              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
+              {
+                fSim_mu_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
+                fSim_mu_Edep_a2 += energyDeposit.energy;
+              }
+              // Method b
+              std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
+              if ( Wires[0].planeID().Plane == 0 )
+              {
+                fSim_mu_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
+                fSim_mu_Edep_b2 += energyDeposit.energy;
+              } // end if access plane info via channel -> wire -> plane ID is 0
+
+            }// end muon energy deposit
+
+
             // If it's not from primary leptons, count it as hadronic
-            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 ) {
+            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            {
 
               //
               // Method a: only include the energy from the collection plane: geo::kCollection defined in
