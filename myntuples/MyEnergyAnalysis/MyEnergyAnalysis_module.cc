@@ -59,6 +59,7 @@ namespace {
   // Sort MC particles based on its start momentum P(0)
   bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
 
+
 } // local namespace
 
 // An outside package call this module like lar::example::MyEnergyAnalysis
@@ -168,6 +169,11 @@ namespace lar {
       double fNuvtxx_truth; 		 //Genie true neutrino interaction vertex x
       double fNuvtxy_truth; 		 //Genie true neutrino interaction vertex y
       double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
+      int fNuPDG;                        // Generator level neutrino PDG code
+      int fLepPDG;                       // Generator level outgoing lepton PDG code
+      double fLepNuAngle;                // Angle b/w nu and lepton
+
+
 
       double fGen_numu_E;                // Energy of generator level neutrino [GeV]
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
@@ -196,8 +202,7 @@ namespace lar {
       double fSim_mu_Edep_b1;                // [GeV]
       double fSim_mu_Edep_b2;                // [MeV]
 
-      int fNuPdg;                        // Generator level neutrino PDG code
-      int fLepPDG;                       // Generator level outgoing lepton PDG code
+
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
@@ -224,6 +229,22 @@ namespace lar {
       //
       geo::GeometryCore const* fGeometryService; // pointer to Geometry provider
       double fElectronsToGeV;                    // conversion factor for no. of ionization electrons to energy deposited in GeV
+
+      // True info for each particle generated
+      std::vector<int> fP_PDG;                         // PDG code for each particle
+      int fP_num;                         // Number of types of particle
+      std::vector<int> fP_StatusCode;                  // Status code for each particle, https://internal.dunescience.org/doxygen/GENIEGen__module_8cc_source.html
+      std::vector<float> fP_vtx_x;                    // Position: x component for each particle
+      std::vector<float> fP_vtx_y;                    // Position: y component for each particle
+      std::vector<float> fP_vtx_z;                    // Position: z component for each particle
+      std::vector<float> fP_ptot;                     // Total momentum for each particle
+      std::vector<float> fP_px;                       // Momentum: x component for each particle
+      std::vector<float> fP_py;                       // Momentum: y component for each particle
+      std::vector<float> fP_pz;                       // Momentum: z component for each particle
+      std::vector<float> fP_E;                        // Energy for each particle [GeV]
+      std::vector<float> fP_mass;                     // Mass for each particle [GeV/c^2]
+      std::vector<float> fP_Ek;                       // Kinetic Energy for each particle [GeV]
+
 
     }; // class MyEnergyAnalysis
 
@@ -290,7 +311,9 @@ namespace lar {
       fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,           "Nuvtxz_truth/D");
       // Generator level PDG code
       fNtuple->Branch("LepPDG",        	          &fLepPDG,     	          "LepPDG/I");
-      fNtuple->Branch("neuPDG",         	     	  &fNuPdg,             	    "neuPDG/I");
+      fNtuple->Branch("neuPDG",         	     	  &fNuPDG,             	    "neuPDG/I");
+      fNtuple->Branch("LepNuAngle",               &fLepNuAngle,             "LepNuAngle/D");
+
 
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
@@ -349,6 +372,21 @@ namespace lar {
       fNtuple->Branch("Sim_hadronic_hit_Edep_b1", &fSim_hadronic_hit_Edep_b1);
       fNtuple->Branch("Sim_hadronic_hit_Edep_b2", &fSim_hadronic_hit_Edep_b2);
 
+      // True info for each particle
+      fNtuple->Branch("P_num",                    &fP_num,                "P_num/I");
+      fNtuple->Branch("P_PDG",        	          &fP_PDG);
+      fNtuple->Branch("P_StatusCode",             &fP_StatusCode);
+      fNtuple->Branch("P_vtx_x",                  &fP_vtx_x);
+      fNtuple->Branch("P_vtx_y",                  &fP_vtx_y);
+      fNtuple->Branch("P_vtx_z",                  &fP_vtx_z);
+      fNtuple->Branch("P_ptot",                   &fP_ptot);
+      fNtuple->Branch("P_px",                     &fP_px);
+      fNtuple->Branch("P_py",                     &fP_py);
+      fNtuple->Branch("P_pz",                     &fP_pz);
+      fNtuple->Branch("P_E",                      &fP_E);
+      fNtuple->Branch("P_mass",                   &fP_mass);
+      fNtuple->Branch("P_Ek",                     &fP_Ek);
+
       // Reconstruction branches
 
     }
@@ -373,12 +411,12 @@ namespace lar {
 
       // Initialize
       fGen_numu_E                = -9999.;
-      fCCNC_truth     		 = -9999.;
-      fMode_truth     		 = -9999.;
-      fInteractionType 		 = -9999.;
-      fNuvtxx_truth 		 = -9999.;
-      fNuvtxy_truth 		 = -9999.;
-      fNuvtxz_truth  		 = -9999.;
+      fCCNC_truth     		       = -9999.;
+      fMode_truth     		       = -9999.;
+      fInteractionType 		       = -9999.;
+      fNuvtxx_truth 		         = -9999.;
+      fNuvtxy_truth         		 = -9999.;
+      fNuvtxz_truth  	        	 = -9999.;
       fSim_numu_E                = -9999.;
       fSim_mu_start_vx           = -9999.;
       fSim_mu_start_vy           = -9999.;
@@ -396,6 +434,26 @@ namespace lar {
       fSim_mu_end_E              = -9999.;
       fSim_mu_track_length       = -9999.;
 
+      // Initialize true info
+      fNuPDG      = 0;
+      fLepPDG     = 0;
+      fLepNuAngle = -9999.;
+
+      fP_num        = 0;
+      fP_PDG.clear();
+      fP_StatusCode.clear();
+      fP_vtx_x.clear();
+      fP_vtx_y.clear();
+      fP_vtx_z.clear();
+      fP_ptot.clear();
+      fP_px.clear();
+      fP_py.clear();
+      fP_pz.clear();
+      fP_E.clear();
+      fP_mass.clear();
+      fP_Ek.clear();
+
+      // Initialize mu deposit energy
       fSim_mu_Edep_a1 = 0.;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
       fSim_mu_Edep_a2 = 0.;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
       fSim_mu_Edep_b1 = 0.;
@@ -446,9 +504,10 @@ namespace lar {
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
 	      fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
-      	fNuPdg    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
+      	fNuPDG    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
 	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
         fLepE       = mclist[0]->GetNeutrino().Lepton().Momentum().T(); // Generator level neutrino lepton energy
+        fLepNuAngle = mclist[0]->GetNeutrino().Nu().Momentum().Vect().Angle(mclist[0]->GetNeutrino().Lepton().Momentum().Vect()); // Angle b/w nu and lepton
       }
       // Is evt vtx GetNeutrino().Nu().Vx()?
 
@@ -461,46 +520,83 @@ namespace lar {
       ePim = 0.;
       ePi0 = 0.;
       eOther = 0.;
+
+      fP_num = mclist[0]->NParticles();
+      std::cout << "fP_num: " << fP_num << "\n\n";
+
       for ( int p = 0; p < mclist[0]->NParticles(); p++ )
       {
-        if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
-        {
-          int pdg = mclist[0]->GetParticle(p).PdgCode();
-          double ke = mclist[0]->GetParticle(p).E() - mclist[0]->GetParticle(p).Mass();
-          if ( pdg == 2212 ) // kPdgProton
+        fP_PDG.push_back(mclist[0]->GetParticle(p).PdgCode());
+        fP_StatusCode.push_back(mclist[0]->GetParticle(p).StatusCode());
+        fP_vtx_x.push_back(mclist[0]->GetParticle(p).Vx());
+        fP_vtx_y.push_back(mclist[0]->GetParticle(p).Vy());
+        fP_vtx_z.push_back(mclist[0]->GetParticle(p).Vz());
+        fP_ptot.push_back(mclist[0]->GetParticle(p).P());
+        fP_px.push_back(mclist[0]->GetParticle(p).Px());
+        fP_py.push_back(mclist[0]->GetParticle(p).Py());
+        fP_pz.push_back(mclist[0]->GetParticle(p).Pz());
+        fP_E.push_back(mclist[0]->GetParticle(p).E());
+        fP_mass.push_back(mclist[0]->GetParticle(p).Mass());
+        fP_Ek.push_back(fP_E.at(p) - fP_mass.at(p));
+        // if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
+        // {
+
+          if ( fP_PDG.at(p) == 2212 ) // kPdgProton
           {
-            eP += ke;
+            eP += fP_Ek.at(p);
           }
-          else if ( pdg == 2112 ) // kPdgNeutron
+          else if ( fP_PDG.at(p) == 2112 ) // kPdgNeutron
           {
-            eN += ke;
+            eN += fP_Ek.at(p);
           }
-          else if ( pdg == 211 ) // kPdgPiP
+          else if ( fP_PDG.at(p) == 211 ) // kPdgPiP
           {
-            ePip += ke;
+            ePip += fP_Ek.at(p);
           }
-          else if ( pdg == -211 ) // kPdgPiM
+          else if ( fP_PDG.at(p) == -211 ) // kPdgPiM
           {
-            ePim += ke;
+            ePim += fP_Ek.at(p);
           }
-          else if ( pdg == 111 ) // kPdgPi0
+          else if ( fP_PDG.at(p) == 111 ) // kPdgPi0
           {
             nPi0++;
-            ePi0 += ke;
+            ePi0 += fP_Ek.at(p);
           }
-          else if ( pdg == 321 || pdg == -321 || pdg == 311 || pdg == -311 || pdg == 130 || pdg == 310 || pdg == 22 || (pdg>=100 && pdg<=9999) || (pdg>=-9999 && pdg<=-100)) // kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
+          else if ( fP_PDG.at(p) == 321 || fP_PDG.at(p) == -321 || fP_PDG.at(p) == 311 || fP_PDG.at(p) == -311 || fP_PDG.at(p) == 130 || fP_PDG.at(p) == 310 || fP_PDG.at(p) == 22 || (fP_PDG.at(p)>=100 && fP_PDG.at(p)<=9999) || (fP_PDG.at(p)>=-9999 && fP_PDG.at(p)<=-100)) // kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
           {
-            eOther += ke;
+            eOther += fP_Ek.at(p);
           }
-        }
-      }
+        // } end kIStHadronInTheNucleus
+        std::cout << "p: " << p << "\n";
+        std::cout << "fP_PDG: " << fP_PDG.at(p) << "\n";
+        std::cout << "fP_StatusCode: " << fP_StatusCode.at(p) << "\n";
+        std::cout << "fP_vtx_x: " << fP_vtx_x.at(p) << "\n";
+        std::cout << "fP_vtx_y: " << fP_vtx_y.at(p) << "\n";
+        std::cout << "fP_vtx_z: " << fP_vtx_z.at(p) << "\n";
+        std::cout << "fP_ptot: " << fP_ptot.at(p) << "\n";
+        std::cout << "fP_px: " << fP_px.at(p) << "\n";
+        std::cout << "fP_py: " << fP_py.at(p) << "\n";
+        std::cout << "fP_pz: " << fP_pz.at(p) << "\n";
+        std::cout << "fP_E: " << fP_E.at(p) << "\n";
+        std::cout << "fP_mass: " << fP_mass.at(p) << "\n";
+        std::cout << "fP_Ek: " << fP_Ek.at(p) << "\n\n";
+
+      } // end mclist[0]->NParticles() loop
 
       // True visible energy:
-      double pi0_mass = 0.135; // GeV
+      double pi0_mass = 0.134977; // GeV
       E_vis_true = fLepE + eP + ePip + ePim + ePi0 + eOther + nPi0 * pi0_mass;
+      // VisTrue_NDFD = LepE + HadE,
+      // HadE = eP + ePip + ePim + ePi0 + (0.135 * nipi0) + eother
 
 
 
+
+
+
+      //------------------------------------------------------------------------
+      //------------------------------------------------------------------------
+      //------------------------------------------------------------------------
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
       auto simChannelHandle = event.getValidHandle<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
@@ -534,6 +630,7 @@ namespace lar {
       std::vector<const simb::MCParticle*> SimProtons;
 
       // Loop over the list of particles in the event
+      // GENIE: primary process; GEANT4: primary+secondary
       for ( auto const& particle : (*particleHandle) ) {
 
         // For the methods you can call for MCParticle, see ${NUSIMDATA_INC}/nusimdata/SimulationBase/MCParticle.h.
