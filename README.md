@@ -28,10 +28,6 @@ cd /gpfs/projects/McGrewGroup/<usrname>/DUNE
 mkdir FDEff                                                                              # First time only
 cd FDEff
 
-module unload cmake
-module load cmake/3.17.3
-# unsetup cmake v3_13_2
-
 source /gpfs/projects/McGrewGroup/weishi/DUNE/ups/setup                                  # source this file under my directory                              
 setup git
 setup gitflow
