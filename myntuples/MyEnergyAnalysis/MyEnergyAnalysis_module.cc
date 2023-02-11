@@ -522,7 +522,7 @@ namespace lar {
       eOther = 0.;
 
       fP_num = mclist[0]->NParticles();
-      std::cout << "fP_num: " << fP_num << "\n\n";
+      // std::cout << "fP_num: " << fP_num << "\n\n";
 
       for ( int p = 0; p < mclist[0]->NParticles(); p++ )
       {
@@ -538,8 +538,9 @@ namespace lar {
         fP_E.push_back(mclist[0]->GetParticle(p).E());
         fP_mass.push_back(mclist[0]->GetParticle(p).Mass());
         fP_Ek.push_back(fP_E.at(p) - fP_mass.at(p));
-        // if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
-        // {
+
+        if(mclist[0]->GetParticle(p).StatusCode() == 14 ) // kIStHadronInTheNucleus
+        {
 
           if ( fP_PDG.at(p) == 2212 ) // kPdgProton
           {
@@ -566,20 +567,21 @@ namespace lar {
           {
             eOther += fP_Ek.at(p);
           }
-        // } end kIStHadronInTheNucleus
-        std::cout << "p: " << p << "\n";
-        std::cout << "fP_PDG: " << fP_PDG.at(p) << "\n";
-        std::cout << "fP_StatusCode: " << fP_StatusCode.at(p) << "\n";
-        std::cout << "fP_vtx_x: " << fP_vtx_x.at(p) << "\n";
-        std::cout << "fP_vtx_y: " << fP_vtx_y.at(p) << "\n";
-        std::cout << "fP_vtx_z: " << fP_vtx_z.at(p) << "\n";
-        std::cout << "fP_ptot: " << fP_ptot.at(p) << "\n";
-        std::cout << "fP_px: " << fP_px.at(p) << "\n";
-        std::cout << "fP_py: " << fP_py.at(p) << "\n";
-        std::cout << "fP_pz: " << fP_pz.at(p) << "\n";
-        std::cout << "fP_E: " << fP_E.at(p) << "\n";
-        std::cout << "fP_mass: " << fP_mass.at(p) << "\n";
-        std::cout << "fP_Ek: " << fP_Ek.at(p) << "\n\n";
+        } //end kIStHadronInTheNucleus
+
+        // std::cout << "p: " << p << "\n";
+        // std::cout << "fP_PDG: " << fP_PDG.at(p) << "\n";
+        // std::cout << "fP_StatusCode: " << fP_StatusCode.at(p) << "\n";
+        // std::cout << "fP_vtx_x: " << fP_vtx_x.at(p) << "\n";
+        // std::cout << "fP_vtx_y: " << fP_vtx_y.at(p) << "\n";
+        // std::cout << "fP_vtx_z: " << fP_vtx_z.at(p) << "\n";
+        // std::cout << "fP_ptot: " << fP_ptot.at(p) << "\n";
+        // std::cout << "fP_px: " << fP_px.at(p) << "\n";
+        // std::cout << "fP_py: " << fP_py.at(p) << "\n";
+        // std::cout << "fP_pz: " << fP_pz.at(p) << "\n";
+        // std::cout << "fP_E: " << fP_E.at(p) << "\n";
+        // std::cout << "fP_mass: " << fP_mass.at(p) << "\n";
+        // std::cout << "fP_Ek: " << fP_Ek.at(p) << "\n\n";
 
       } // end mclist[0]->NParticles() loop
 
@@ -772,8 +774,8 @@ namespace lar {
 
 
             // If it's not from primary leptons, count it as hadronic
-            // if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
-            if ( abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            // if ( abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
             {
 
               //
