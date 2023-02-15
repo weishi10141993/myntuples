@@ -170,7 +170,8 @@ namespace lar {
       double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
       int fNuPDG;                        // Generator level neutrino PDG code
       int fLepPDG;                       // Generator level outgoing lepton PDG code
-      double fLepMomX, fLepMomY, fLepMomZ; // Generator level outgoing lepton momentum
+      double fLepMomX, fLepMomY, fLepMomZ;      // Generator level outgoing lepton momentum
+      double vtx_x, vtx_y, vtx_z;               // Generator level outgoing lepton vtx
       double fLepE;                      // Generator level neutrino lepton energy [GeV]
       double fLepNuAngle;                // Angle b/w nu and lepton
 
@@ -317,6 +318,10 @@ namespace lar {
       fNtuple->Branch("LepMomX",                  &fLepMomX,                "LepMomX/D");
       fNtuple->Branch("LepMomY",                  &fLepMomY,                "LepMomY/D");
       fNtuple->Branch("LepMomZ",                  &fLepMomZ,                "LepMomZ/D");
+      fNtuple->Branch("vtx_x",          &vtx_x,           "vtx_x/D");
+      fNtuple->Branch("vtx_y",          &vtx_y,           "vtx_y/D");
+      fNtuple->Branch("vtx_z",          &vtx_z,           "vtx_z/D");
+
 
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
@@ -515,6 +520,9 @@ namespace lar {
         fLepMomX    = mclist[0]->GetNeutrino().Lepton().Momentum().X(); // Generator level lepton momentum x
         fLepMomY    = mclist[0]->GetNeutrino().Lepton().Momentum().Y();  // Generator level lepton momentum y
         fLepMomZ    = mclist[0]->GetNeutrino().Lepton().Momentum().Z();  // Generator level lepton momentum z
+        vtx_x       = mclist[0]->GetNeutrino().Lepton().Vx();   // Generator level lepton vtx x
+        vtx_y       = mclist[0]->GetNeutrino().Lepton().Vy();   // Generator level lepton vtx y
+        vtx_z       = mclist[0]->GetNeutrino().Lepton().Vz();   // Generator level lepton vtx z
         fLepE       = mclist[0]->GetNeutrino().Lepton().Momentum().T(); // Generator level neutrino lepton energy
         fLepNuAngle = mclist[0]->GetNeutrino().Nu().Momentum().Vect().Angle(mclist[0]->GetNeutrino().Lepton().Momentum().Vect()); // Angle b/w nu and lepton
       }
