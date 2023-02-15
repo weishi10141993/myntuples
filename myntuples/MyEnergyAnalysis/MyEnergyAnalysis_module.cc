@@ -171,7 +171,7 @@ namespace lar {
       int fNuPDG;                        // Generator level neutrino PDG code
       int fLepPDG;                       // Generator level outgoing lepton PDG code
       double fLepMomX, fLepMomY, fLepMomZ;      // Generator level outgoing lepton momentum
-      double vtx_x, vtx_y, vtx_z;               // Generator level outgoing lepton vtx
+      double fLepvtx_x, fLepvtx_y, fLepvtx_z;               // Generator level outgoing lepton vtx
       double fLepE;                      // Generator level neutrino lepton energy [GeV]
       double fLepNuAngle;                // Angle b/w nu and lepton
 
@@ -318,9 +318,9 @@ namespace lar {
       fNtuple->Branch("LepMomX",                  &fLepMomX,                "LepMomX/D");
       fNtuple->Branch("LepMomY",                  &fLepMomY,                "LepMomY/D");
       fNtuple->Branch("LepMomZ",                  &fLepMomZ,                "LepMomZ/D");
-      fNtuple->Branch("vtx_x",          &vtx_x,           "vtx_x/D");
-      fNtuple->Branch("vtx_y",          &vtx_y,           "vtx_y/D");
-      fNtuple->Branch("vtx_z",          &vtx_z,           "vtx_z/D");
+      fNtuple->Branch("Lepvtx_x",          &fLepvtx_x,           "Lepvtx_x/D");
+      fNtuple->Branch("Lepvtx_y",          &fLepvtx_y,           "Lepvtx_y/D");
+      fNtuple->Branch("Lepvtx_z",          &fLepvtx_z,           "Lepvtx_z/D");
 
 
       // Simulation branches Sim*
@@ -449,6 +449,9 @@ namespace lar {
       fLepMomX    = -9999.;
       fLepMomY    = -9999.;
       fLepMomZ    = -9999.;
+      fLepvtx_x    = -9999.;
+      fLepvtx_y    = -9999.;
+      fLepvtx_z    = -9999.;
 
       fP_num        = 0;
       fP_PDG.clear();
@@ -520,9 +523,9 @@ namespace lar {
         fLepMomX    = mclist[0]->GetNeutrino().Lepton().Momentum().X(); // Generator level lepton momentum x
         fLepMomY    = mclist[0]->GetNeutrino().Lepton().Momentum().Y();  // Generator level lepton momentum y
         fLepMomZ    = mclist[0]->GetNeutrino().Lepton().Momentum().Z();  // Generator level lepton momentum z
-        vtx_x       = mclist[0]->GetNeutrino().Lepton().Vx();   // Generator level lepton vtx x
-        vtx_y       = mclist[0]->GetNeutrino().Lepton().Vy();   // Generator level lepton vtx y
-        vtx_z       = mclist[0]->GetNeutrino().Lepton().Vz();   // Generator level lepton vtx z
+        fLepvtx_x       = mclist[0]->GetNeutrino().Lepton().Vx();   // Generator level lepton vtx x
+        fLepvtx_y       = mclist[0]->GetNeutrino().Lepton().Vy();   // Generator level lepton vtx y
+        fLepvtx_z       = mclist[0]->GetNeutrino().Lepton().Vz();   // Generator level lepton vtx z
         fLepE       = mclist[0]->GetNeutrino().Lepton().Momentum().T(); // Generator level neutrino lepton energy
         fLepNuAngle = mclist[0]->GetNeutrino().Nu().Momentum().Vect().Angle(mclist[0]->GetNeutrino().Lepton().Momentum().Vect()); // Angle b/w nu and lepton
       }
@@ -791,8 +794,8 @@ namespace lar {
 
 
             // If it's not from primary leptons, count it as hadronic
-            if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
-            // if ( abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            // if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            if ( abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
             {
 
               //
