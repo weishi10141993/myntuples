@@ -142,7 +142,6 @@ namespace lar {
       int fSubRun; // number of the sub-run being processed
 
       // Add true nu information
-      double fLepE;                      // Generator level neutrino lepton energy [GeV]
       int nPi0;                          // # of Pi0
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
       double E_vis_true;                 // True vis energy [GeV]
@@ -171,6 +170,8 @@ namespace lar {
       double fNuvtxz_truth;  		 //Genie true neutrino interaction vertex z
       int fNuPDG;                        // Generator level neutrino PDG code
       int fLepPDG;                       // Generator level outgoing lepton PDG code
+      double fLepMomX, fLepMomY, fLepMomZ // Generator level outgoing lepton momentum
+      double fLepE;                      // Generator level neutrino lepton energy [GeV]
       double fLepNuAngle;                // Angle b/w nu and lepton
 
 
@@ -311,9 +312,11 @@ namespace lar {
       fNtuple->Branch("Nuvtxz_truth",             &fNuvtxz_truth,           "Nuvtxz_truth/D");
       // Generator level PDG code
       fNtuple->Branch("LepPDG",        	          &fLepPDG,     	          "LepPDG/I");
-      fNtuple->Branch("neuPDG",         	     	  &fNuPDG,             	    "neuPDG/I");
+      fNtuple->Branch("NuPDG",         	      	  &fNuPDG,             	    "NuPDG/I");
       fNtuple->Branch("LepNuAngle",               &fLepNuAngle,             "LepNuAngle/D");
-
+      fNtuple->Branch("LepMomX",                  &fLepMomX,                "LepMomX/D");
+      fNtuple->Branch("LepMomY",                  &fLepMomY,                "LepMomY/D");
+      fNtuple->Branch("LepMomZ",                  &fLepMomZ,                "LepMomZ/D");
 
       // Simulation branches Sim*
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
@@ -438,6 +441,9 @@ namespace lar {
       fNuPDG      = 0;
       fLepPDG     = 0;
       fLepNuAngle = -9999.;
+      fLepMomX    = -9999.;
+      fLepMomY    = -9999.;
+      fLepMomZ    = -9999.;
 
       fP_num        = 0;
       fP_PDG.clear();
@@ -506,6 +512,9 @@ namespace lar {
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       	fNuPDG    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
 	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+        fLepMomX    = truth[i]->GetNeutrino().Lepton().Momentum().X(); // Generator level lepton momentum x
+        fLepMomY    = truth[i]->GetNeutrino().Lepton().Momentum().Y();  // Generator level lepton momentum y
+        fLepMomZ    = truth[i]->GetNeutrino().Lepton().Momentum().Z();  // Generator level lepton momentum z
         fLepE       = mclist[0]->GetNeutrino().Lepton().Momentum().T(); // Generator level neutrino lepton energy
         fLepNuAngle = mclist[0]->GetNeutrino().Nu().Momentum().Vect().Angle(mclist[0]->GetNeutrino().Lepton().Momentum().Vect()); // Angle b/w nu and lepton
       }
