@@ -88,7 +88,7 @@ Now get txt file that lists of input files and work env set up script:
 
 ```
 cd /dune/app/users/weishi
-cp /dune/app/users/weishi/MCC11FDBeamsim_nu_reco.txt .
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/MCC11FDBeamsim_nu_reco.txt --no-check-certificate
 wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/setupFDEffTarBall-grid.sh --no-check-certificate
 ```
 
@@ -101,9 +101,10 @@ tar -czvf FDEff.tar.gz FDEff setupFDEffTarBall-grid.sh MCC11FDBeamsim_nu_reco.tx
 
 Now get one of the following grid running scripts
 ```
-wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall_grid.sh --no-check-certificate
-# OR
 wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall_autogrid.sh --no-check-certificate
+# Or this one that allows you to set the number of input files using line number in txt file:
+wget https://raw.githubusercontent.com/weishi10141993/NeutrinoPhysics/main/run_FDEffTarBall_grid.sh --no-check-certificate
+
 ```
 
 Finally you can submit the job:
@@ -133,14 +134,17 @@ To check job status,
 
 ```
 jobsub_q --user weishi
+jobsub_q 57321037.0@jobsub01.fnal.gov -G dune
 # For more options: jobsub_q --help
 ```
 
 To fetch job output,
 
 ```
-jobsub_fetchlog --jobid=<id> --unzipdir=<dir>
+jobsub_fetchlog 57306776.0@jobsub01.fnal.gov  -G dune
 ```
+
+Since Feb 15, 2023, [jobsub_lite](https://fifewiki.fnal.gov/wiki/Getting_started_with_jobsub_lite) becomes the new interface to submit and manage jobs.
 
 ### Locate files with SAM
 
@@ -217,7 +221,9 @@ samweb run-project --defname=kherner-may2022tutorial-mc --schema https 'echo %fi
 ```
 
 
-## NN group machine environment setup:
+## NN group machine environment setup
+
+Note: this setup is not working anymore since ivy is replaced by nnhome (Debian bullseye). (Feb 19, 2023)
 
 On NN group machine (ivy.physics.sunysb.edu, CentOS 6.10), I installed a DUNE software release on the ivy machine using the following setup, you can skip this part and go to [Set up work area on Ivy](#set-up-work-area-on-ivy).
 
@@ -319,56 +325,6 @@ For reference, the ND analysis uses [these](https://github.com/DUNE/ND_CAFMaker)
 
 The ```dumptree.py``` file uses functions in this [repo](https://github.com/cvilelahep/DUNE_ND_GeoEff).
 
-## [!!! Under construction !!!] Instruction for environment setup from SeaWulf cluster: seawulf.stonybrook.edu (CentOS 7.9.2009)
+## Instruction for environment setup on SeaWulf
 
-Use the following setup to first install a DUNE software release on the SeaWulf machine. Note files older than 1 month will be purged from the SeaWulf scratch directory, so you may want to ask for more quota in your SeaWulf home area and do the following software installation (need more than 20 GB) there. After that, go to [Install CMake binaries](#install-cmake-binaries) and [Set up work area on SeaWulf](#set-up-work-area-on-SeaWulf).
-
-```
-cd /gpfs/scratch/<netID>                                                                                                    
-mkdir ups
-mkdir upstars
-cd upstars
-wget https://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts
-chmod +x ./pullProducts
-./pullProducts /gpfs/scratch/<netID>/ups slf7 dune-v09_22_02 e19 debug
-```
-
-### Install CMake binaries
-
-```
-mkdir ~/CMake
-cd ~/CMake
-wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz
-tar xf cmake-3.13.2-Linux-x86_64.tar.gz
-export PATH="/gpfs/home/<netID>/CMake/cmake-3.13.2-Linux-x86_64/bin:$PATH"               # Save it in .bashrc if needed
-```
-
-### Set up work area on SeaWulf
-
-This setup doesn't work yet. ```mrbsetenv``` reports ```ERROR: Action parsing failed on "unsetuprequired(cmake v3_13_2)"```.
-
-[First time only]
-
-```
-mkdir ~/FDEff                                                                            # First time only
-cd ~/FDEff
-source /gpfs/scratch/<netID>/ups/setup                                                   # You can use mine as I've installed it: source /gpfs/scratch/weishi2/ups/setup
-setup git
-setup gitflow
-setup mrb
-setup dunetpc v09_22_02 -q e19:debug
-
-export MRB_PROJECT=larsoft                                                               # Need to set ${MRB_PROJECT} to the master product
-mrb newDev
-source /gpfs/home/<netID>/FDEff/localProducts_larsoft_v08_62_01_e19_prof_py2/setup
-# For example: source /gpfs/home/weishi2/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
-
-cd srcs                            
-git clone https://github.com/weishi10141993/myntuples.git                                # First time only, checkout the analysis code from GitHub
-
-mrb uc                                                                                   # Tell mrb to update CMakeLists.txt with the latest version numbers of the products.
-cd ${MRB_BUILDDIR}                                                                       # Go to your build directory
-mrb z
-mrbsetenv                                                                               
-mrb install   
-```
+Refer to [Set up work area on SeaWulf](https://github.com/weishi10141993/myntuples/tree/ereco_study#set-up-work-area-on-seawulf).
