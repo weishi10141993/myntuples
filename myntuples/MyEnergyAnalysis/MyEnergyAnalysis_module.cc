@@ -250,6 +250,7 @@ namespace lar {
       std::vector<float> fP_E;                        // Energy for each particle [GeV]
       std::vector<float> fP_mass;                     // Mass for each particle [GeV/c^2]
       std::vector<float> fP_Ek;                       // Kinetic Energy for each particle [GeV]
+      std::vector<int>   fP_mother;                    // Find the parent of the produced particle. -1 means this particle has no mother
 
       // True info for energy
       double fTrue_HadE;                              // True had E by adding all fP_E (!=lepton)
@@ -403,6 +404,7 @@ namespace lar {
 
       // True info for each particle
       fNtuple->Branch("P_num",                    &fP_num,                "P_num/I");
+      fNtuple->Branch("P_mother",                 &fP_mother);
       fNtuple->Branch("P_PDG",        	          &fP_PDG);
       fNtuple->Branch("P_StatusCode",             &fP_StatusCode);
       fNtuple->Branch("P_vtx_x",                  &fP_vtx_x);
@@ -482,6 +484,7 @@ namespace lar {
 
       fP_num        = 0;
       fP_PDG.clear();
+      fP_mother.clear();
       fP_StatusCode.clear();
       fP_vtx_x.clear();
       fP_vtx_y.clear();
@@ -587,6 +590,7 @@ namespace lar {
       fTrue_HadE = 0.;
       fTrue_LepE = 0.;
       fVis_HadE = 0.;
+      double proton_mass = 0.93827; // GeV
 
       // Choose CC event only
       if ( fCCNC_truth ==0 )
@@ -594,6 +598,7 @@ namespace lar {
         for ( int p = 0; p < mclist[0]->NParticles(); p++ )
         {
           fP_PDG.push_back(mclist[0]->GetParticle(p).PdgCode());
+          fP_mother.push_back(mclist[0]->GetParticle(p).Mother());
           fP_StatusCode.push_back(mclist[0]->GetParticle(p).StatusCode());
           fP_vtx_x.push_back(mclist[0]->GetParticle(p).Vx());
           fP_vtx_y.push_back(mclist[0]->GetParticle(p).Vy());
@@ -609,26 +614,42 @@ namespace lar {
 
 
           // Stable Final State
-          if ( fP_StatusCode.at(p) == 1 )
+          // The sum of true energy of hadrons and leptons should be true nu energy minus binding energy
+          // Paper related to the binding energy: https://link.springer.com/article/10.1140/epjc/s10052-019-6750-3
+          // Calculate true vis had E
+          if ( fP_StatusCode.at(p) == 1 ) // Stable Final State
           {
-            // Calculate true had E
-            if ( abs(fP_PDG.at(p)) != 13 )
-            {
-              fTrue_HadE += fP_Ek.at(p);
-            }
 
             // Claculate true Lep E
             if ( abs(fP_PDG.at(p)) == 13 )
             {
               fTrue_LepE += fP_E.at(p);
             }
-          }
 
 
 
-          // Calculate true vis had E
-          if ( fP_StatusCode.at(p) == 1 ) // Stable Final State
-          {
+            if ( abs(fP_PDG.at(p)) <= 999 && abs(fP_PDG.at(p)) >=100 ) // kPdgMeson
+            {
+              fTrue_HadE += fP_E.at(p);
+            }
+            else if (fP_PDG.at(p) == 2212 || fP_PDG.at(p) == 2112) // kPdgProton or kPdgNeutron
+            {
+              fTrue_HadE += fP_Ek.at(p);
+            }
+            else if ( fP_PDG.at(p) <= 9999 && fP_PDG.at(p) >= 1000  ) // kPdgBaryon except proton and neutron
+            {
+              fTrue_HadE += fP_Ek.at(p) + ( fP_mass.at(p) - proton_mass );
+            }
+            else if ( fP_PDG.at(p) >= -9999 && fP_PDG.at(p) <= -1000  ) // kPdgAntiBaryon except proton and neutron, antihyperon
+            {
+              fTrue_HadE += fP_Ek.at(p) + 2*fP_mass.at(p) + ( fP_mass.at(p) - proton_mass );
+            }
+            else if (fP_PDG.at(p) == 22) // kPdgGamma
+            {
+              fTrue_HadE += fP_E.at(p);
+            }
+
+
 
             if ( fP_PDG.at(p) == 2212 ) // kPdgProton
             {
@@ -661,32 +682,17 @@ namespace lar {
               nOther++;
             }
           } //end kIStHadronInTheNucleus
-
-          // std::cout << "p: " << p << "\n";
-          // std::cout << "fP_PDG: " << fP_PDG.at(p) << "\n";
-          // std::cout << "fP_StatusCode: " << fP_StatusCode.at(p) << "\n";
-          // std::cout << "fP_vtx_x: " << fP_vtx_x.at(p) << "\n";
-          // std::cout << "fP_vtx_y: " << fP_vtx_y.at(p) << "\n";
-          // std::cout << "fP_vtx_z: " << fP_vtx_z.at(p) << "\n";
-          // std::cout << "fP_ptot: " << fP_ptot.at(p) << "\n";
-          // std::cout << "fP_px: " << fP_px.at(p) << "\n";
-          // std::cout << "fP_py: " << fP_py.at(p) << "\n";
-          // std::cout << "fP_pz: " << fP_pz.at(p) << "\n";
-          // std::cout << "fP_E: " << fP_E.at(p) << "\n";
-          // std::cout << "fP_mass: " << fP_mass.at(p) << "\n";
-          // std::cout << "fP_Ek: " << fP_Ek.at(p) << "\n\n";
-
         } // end mclist[0]->NParticles() loop
 
         // True visible energy:
         double pi0_mass = 0.134977; // GeV
         fVis_HadE = eP + ePip + ePim + ePi0 + eOther + nPi0 * pi0_mass;
-        E_vis_true = fVis_LepE + fVis_HadE;
+        E_vis_true = fVis_LepE + fVis_HadE; // KE of leptons and hadrons
         // neutron will not deposit, so it cannot be counted in the E_vis_true
         // VisTrue_NDFD = LepE + HadE,
         // HadE = eP + ePip + ePim + ePi0 + (0.135 * nipi0) + eother
 
-      }
+      } // end CC events selection
 
 
 
@@ -833,7 +839,8 @@ namespace lar {
       //
 
       // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
-      for ( auto const& channel : (*simChannelHandle) ) {
+      for ( auto const& channel : (*simChannelHandle) )
+      {
 
         // Get the numeric ID associated with this channel.
         // See methods at https://internal.dunescience.org/doxygen/SimChannel_8h_source.html
@@ -858,9 +865,9 @@ namespace lar {
             // "search" points to a pair in the map: <track ID, MCParticle*>
             const simb::MCParticle& particle = *((*search).second);
 
-            // Deposit energy for muon
-            // if ( particle.Process() == "primary" && abs(particle.PdgCode()) == 13 )
-            if ( abs(particle.PdgCode()) == 13)
+            // Deposit energy for lepton
+            if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
+             // if ( abs(particle.PdgCode()) == 13)
             {
               // Method a
               if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
@@ -877,18 +884,14 @@ namespace lar {
               } // end if access plane info via channel -> wire -> plane ID is 0
 
             }// end muon energy deposit
-
-
-            // If it's not from primary leptons, count it as hadronic
-            // if ( particle.Process() == "primary" && abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
-            if ( abs(particle.PdgCode()) != 11 && abs(particle.PdgCode()) != 13 && abs(particle.PdgCode()) != 15 )
+            else
             {
-
-              //
+              // If it's not from primary leptons, count it as hadronic
               // Method a: only include the energy from the collection plane: geo::kCollection defined in
               // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
               //
-              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection ) {
+              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
+              {
                 //
                 // Note: there are also two ways to get E deposit for sim::IDE
                 //
@@ -907,7 +910,8 @@ namespace lar {
               // Method b: navigate via channel -> wire -> plane ID, and require planeID to be 0.
               //
               std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-              if ( Wires[0].planeID().Plane == 0 ) {
+              if ( Wires[0].planeID().Plane == 0 )
+              {
 
                 fSim_hadronic_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
                 fSim_hadronic_Edep_b2 += energyDeposit.energy;
