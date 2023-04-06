@@ -150,6 +150,21 @@ namespace lar {
       // Variables related to geneator/simulation
       //
       int fSimPDG;                       // MCParticle PDG ID
+      std::vector<int> fSimP_TrackID_vec;
+      std::vector<int> fSimP_PDG_vec;
+      std::vector<int> fSimP_Mom_vec;
+      std::vector<int> fSimP_SC_vec;
+      std::vector<float> fSimP_vtx_x_vec;
+      std::vector<float> fSimP_vtx_y_vec;
+      std::vector<float> fSimP_vtx_z_vec;
+      std::vector<float> fSimP_ptot_vec;
+      std::vector<float> fSimP_px_vec;
+      std::vector<float> fSimP_py_vec;
+      std::vector<float> fSimP_pz_vec;
+      std::vector<float> fSimP_E_vec;
+      std::vector<float> fSimP_M_vec;
+      std::vector<float> fSimP_Ek_vec;
+
       int fSimTrackID;                   // GEANT ID of the particle being processed
       int fSim_nEle;                     // No. of Sim electrons (e+/e-)
       int fSim_nNue;                     // No. of Sim electron neutrinos (nue and nuebar)
@@ -205,15 +220,20 @@ namespace lar {
 
       double fSim_mu_Edep_a1;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
       double fSim_mu_Edep_a2;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
+      double fSim_mu_Edep_NonCollectionPlane_a2; // [MeV]
+      double fSim_mu_Edep_a2_debug;          // [MeV]
+      double fSim_mu_Edep_b2_debug;          // [MeV]
       double fSim_mu_Edep_b1;                // [GeV]
       double fSim_mu_Edep_b2;                // [MeV]
-
+      double fSim_mu_Edep_NonCollectionPlane_b2; // [MeV]
 
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
       // Method a
       double fSim_hadronic_Edep_a1;      // total amount of electrons reaching the readout channel [GeV]
       double fSim_hadronic_Edep_a2;      // total amount of energy released by ionizations in the event (from Geant4 simulation) [MeV]
+      double fSim_hadronic_Edep_NonCollectionPlane_a2;  // [MeV]
+      double fSim_hadronic_Edep_a2_debug;          // [MeV]
       int fSim_n_hadronic_Edep_a;        // Number of hadronic energy deposits
       std::vector<float> fSim_hadronic_hit_x_a;      // Store position x for each energy deposit
       std::vector<float> fSim_hadronic_hit_y_a;
@@ -223,6 +243,8 @@ namespace lar {
       // Method b
       double fSim_hadronic_Edep_b1;
       double fSim_hadronic_Edep_b2;
+      double fSim_hadronic_Edep_NonCollectionPlane_b2;  // [MeV]
+      double fSim_hadronic_Edep_b2_debug;          // [MeV]
       int fSim_n_hadronic_Edep_b;        // Number of hadronic energy deposits
       std::vector<float> fSim_hadronic_hit_x_b;
       std::vector<float> fSim_hadronic_hit_y_b;
@@ -238,6 +260,7 @@ namespace lar {
 
       // True info for each particle generated
       std::vector<int> fP_PDG;                         // PDG code for each particle
+      std::vector<int> fP_TrackID;                     // TrackID for each particle
       int fP_num;                         // Number of types of particle
       std::vector<int> fP_StatusCode;                  // Status code for each particle, https://internal.dunescience.org/doxygen/GENIEGen__module_8cc_source.html
       std::vector<float> fP_vtx_x;                    // Position: x component for each particle
@@ -343,6 +366,22 @@ namespace lar {
 
 
       // Simulation branches Sim*
+      fNtuple->Branch("SimP_TrackID_vec",              &fSimP_TrackID_vec);
+      fNtuple->Branch("SimP_PDG_vec",                  &fSimP_PDG_vec);
+      fNtuple->Branch("SimP_Mom_vec",                  &fSimP_Mom_vec);
+      fNtuple->Branch("SimP_SC_vec",                   &fSimP_SC_vec);
+      fNtuple->Branch("SimP_vtx_x_vec",                &fSimP_vtx_x_vec);
+      fNtuple->Branch("SimP_vtx_y_vec",                &fSimP_vtx_y_vec);
+      fNtuple->Branch("SimP_vtx_z_vec",                &fSimP_vtx_z_vec);
+      fNtuple->Branch("SimP_ptot_vec",                 &fSimP_ptot_vec);
+      fNtuple->Branch("SimP_px_vec",                   &fSimP_px_vec);
+      fNtuple->Branch("SimP_py_vec",                   &fSimP_py_vec);
+      fNtuple->Branch("SimP_pz_vec",                   &fSimP_pz_vec);
+      fNtuple->Branch("SimP_E_vec",                    &fSimP_E_vec);
+      fNtuple->Branch("SimP_M_vec",                    &fSimP_M_vec);
+      fNtuple->Branch("SimP_Ek_vec",                    &fSimP_Ek_vec);
+
+
       fNtuple->Branch("Sim_nEle",                 &fSim_nEle,               "Sim_nEle/I");
       fNtuple->Branch("Sim_nNue",                 &fSim_nNue,               "Sim_nNue/I");
       fNtuple->Branch("Sim_nMu",                  &fSim_nMu,                "Sim_nMu/I");
@@ -382,11 +421,16 @@ namespace lar {
       fNtuple->Branch("Sim_mu_track_length",      &fSim_mu_track_length,    "Sim_mu_track_length/D");
       fNtuple->Branch("Sim_mu_Edep_a1",           &fSim_mu_Edep_a1,            "Sim_mu_Edep_a1/D");
       fNtuple->Branch("Sim_mu_Edep_a2",           &fSim_mu_Edep_a2,            "Sim_mu_Edep_a2/D");
+      fNtuple->Branch("Sim_mu_Edep_NonCollectionPlane_a2",           &fSim_mu_Edep_NonCollectionPlane_a2,            "fSim_mu_Edep_NonCollectionPlane_a2/D");
       fNtuple->Branch("Sim_mu_Edep_b1",           &fSim_mu_Edep_b1,            "Sim_mu_Edep_b1/D");
       fNtuple->Branch("Sim_mu_Edep_b2",           &fSim_mu_Edep_b2,            "Sim_mu_Edep_b2/D");
+      fNtuple->Branch("Sim_mu_Edep_NonCollectionPlane_b2",           &fSim_mu_Edep_NonCollectionPlane_b2,            "fSim_mu_Edep_NonCollectionPlane_b2/D");
+      fNtuple->Branch("Sim_mu_Edep_a2_debug",           &fSim_mu_Edep_a2_debug,            "fSim_mu_Edep_a2_debug/D");
+      fNtuple->Branch("Sim_mu_Edep_b2_debug",           &fSim_mu_Edep_b2_debug,            "fSim_mu_Edep_b2_debug/D");
 
       fNtuple->Branch("Sim_hadronic_Edep_a1",     &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
       fNtuple->Branch("Sim_hadronic_Edep_a2",     &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
+      fNtuple->Branch("Sim_hadronic_Edep_NonCollectionPlane_a2",     &fSim_hadronic_Edep_NonCollectionPlane_a2,   "Sim_hadronic_Edep_NonCollectionPlane_a2/D");
       fNtuple->Branch("Sim_n_hadronic_Edep_a",    &fSim_n_hadronic_Edep_a,  "Sim_n_hadronic_Edep_a/I");
       fNtuple->Branch("Sim_hadronic_hit_x_a",     &fSim_hadronic_hit_x_a);
       fNtuple->Branch("Sim_hadronic_hit_y_a",     &fSim_hadronic_hit_y_a);
@@ -395,6 +439,9 @@ namespace lar {
       fNtuple->Branch("Sim_hadronic_hit_Edep_a2", &fSim_hadronic_hit_Edep_a2);
       fNtuple->Branch("Sim_hadronic_Edep_b1",     &fSim_hadronic_Edep_b1,   "Sim_hadronic_Edep_b1/D");
       fNtuple->Branch("Sim_hadronic_Edep_b2",     &fSim_hadronic_Edep_b2,   "Sim_hadronic_Edep_b2/D");
+      fNtuple->Branch("Sim_hadronic_Edep_NonCollectionPlane_b2",     &fSim_hadronic_Edep_NonCollectionPlane_b2,   "Sim_hadronic_Edep_NonCollectionPlane_b2/D");
+      fNtuple->Branch("Sim_hadronic_Edep_a2_debug",     &fSim_hadronic_Edep_a2_debug,   "Sim_hadronic_Edep_a2_debug/D");
+      fNtuple->Branch("Sim_hadronic_Edep_b2_debug",     &fSim_hadronic_Edep_b2_debug,   "Sim_hadronic_Edep_b2_debug/D");
       fNtuple->Branch("Sim_n_hadronic_Edep_b",    &fSim_n_hadronic_Edep_b,  "Sim_n_hadronic_Edep_b/I");
       fNtuple->Branch("Sim_hadronic_hit_x_b",     &fSim_hadronic_hit_x_b);
       fNtuple->Branch("Sim_hadronic_hit_y_b",     &fSim_hadronic_hit_y_b);
@@ -405,6 +452,7 @@ namespace lar {
       // True info for each particle
       fNtuple->Branch("P_num",                    &fP_num,                "P_num/I");
       fNtuple->Branch("P_mother",                 &fP_mother);
+      fNtuple->Branch("P_TrackID",                &fP_TrackID);
       fNtuple->Branch("P_PDG",        	          &fP_PDG);
       fNtuple->Branch("P_StatusCode",             &fP_StatusCode);
       fNtuple->Branch("P_vtx_x",                  &fP_vtx_x);
@@ -485,6 +533,7 @@ namespace lar {
       fP_num        = 0;
       fP_PDG.clear();
       fP_mother.clear();
+      fP_TrackID.clear();
       fP_StatusCode.clear();
       fP_vtx_x.clear();
       fP_vtx_y.clear();
@@ -497,19 +546,43 @@ namespace lar {
       fP_mass.clear();
       fP_Ek.clear();
 
-
+      fSimP_TrackID_vec.clear();
+      fSimP_PDG_vec.clear();
+      fSimP_Mom_vec.clear();
+      fSimP_SC_vec.clear();
+      fSimP_vtx_x_vec.clear();
+      fSimP_vtx_y_vec.clear();
+      fSimP_vtx_z_vec.clear();
+      fSimP_ptot_vec.clear();
+      fSimP_px_vec.clear();
+      fSimP_py_vec.clear();
+      fSimP_pz_vec.clear();
+      fSimP_E_vec.clear();
+      fSimP_M_vec.clear();
+      fSimP_Ek_vec.clear();
 
 
       // Initialize mu deposit energy
       fSim_mu_Edep_a1 = 0.;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
       fSim_mu_Edep_a2 = 0.;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
+      fSim_mu_Edep_NonCollectionPlane_a2 = 0.;
       fSim_mu_Edep_b1 = 0.;
       fSim_mu_Edep_b2 = 0.;
+      fSim_mu_Edep_NonCollectionPlane_b2 = 0.;
+
+      fSim_mu_Edep_a2_debug = 0.;
+      fSim_mu_Edep_b2_debug = 0.;
 
       fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
       fSim_hadronic_Edep_a2      = 0.;
+      fSim_hadronic_Edep_NonCollectionPlane_a2 = 0.;
       fSim_hadronic_Edep_b1      = 0.;
       fSim_hadronic_Edep_b2      = 0.;
+      fSim_hadronic_Edep_NonCollectionPlane_b2 = 0.;
+
+      fSim_hadronic_Edep_a2_debug = 0.;
+      fSim_hadronic_Edep_b2_debug = 0.;
+
       for (int i = 0; i < 4; i++) {
         fSim_mu_start_4position[i] = -9999.;
         fSim_mu_end_4position[i]   = -9999.;
@@ -597,6 +670,7 @@ namespace lar {
       {
         for ( int p = 0; p < mclist[0]->NParticles(); p++ )
         {
+          fP_TrackID.push_back(mclist[0]->GetParticle(p).TrackId());
           fP_PDG.push_back(mclist[0]->GetParticle(p).PdgCode());
           fP_mother.push_back(mclist[0]->GetParticle(p).Mother());
           fP_StatusCode.push_back(mclist[0]->GetParticle(p).StatusCode());
@@ -740,18 +814,54 @@ namespace lar {
 
         // For the methods you can call for MCParticle, see ${NUSIMDATA_INC}/nusimdata/SimulationBase/MCParticle.h.
         fSimTrackID = particle.TrackId();
-
+        fSimP_TrackID_vec.push_back(fSimTrackID);
         // Add the address of the MCParticle to the map, with the track ID as the key.
         particleMap[fSimTrackID] = &particle;
 
         // Only for primary particles in the event
         fSimPDG = particle.PdgCode();
+        fSimP_PDG_vec.push_back(fSimPDG);
+        fSimP_Mom_vec.push_back(particle.Mother());
+        fSimP_SC_vec.push_back(particle.StatusCode());
+        fSimP_vtx_x_vec.push_back(particle.Vx());
+        fSimP_vtx_y_vec.push_back(particle.Vy());
+        fSimP_vtx_z_vec.push_back(particle.Vz());
+        fSimP_ptot_vec.push_back(particle.P());
+        fSimP_px_vec.push_back(particle.Px());
+        fSimP_py_vec.push_back(particle.Py());
+        fSimP_pz_vec.push_back(particle.Pz());
+        fSimP_E_vec.push_back(particle.E());
+        fSimP_M_vec.push_back(particle.Mass());
+        fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
+
+
 
         // Calculate sim_lepE and sim_hadE
         if ( particle.StatusCode() == 1 )
         {
-         if ( abs(fSimPDG) == 13 ) fSim_LepE += (particle.E() - particle.Mass());
-         if ( abs(fSimPDG) != 13 ) fSim_HadE += (particle.E() - particle.Mass());
+         // Sim_LepE
+         if ( abs(fSimPDG) == 13 ) fSim_LepE += particle.E();
+         // Sim_HadE
+         if ( abs(fSimPDG) <= 999 && abs(fSimPDG) >=100 ) // kPdgMeson
+            {
+              fSim_HadE += particle.E();
+            }
+            else if (fSimPDG == 2212 || fSimPDG == 2112) // kPdgProton or kPdgNeutron
+            {
+              fSim_HadE += particle.E()-particle.Mass();
+            }
+            else if ( fSimPDG <= 9999 && fSimPDG >= 1000  ) // kPdgBaryon except proton and neutron
+            {
+              fSim_HadE += particle.E()-particle.Mass() + ( particle.Mass() - proton_mass );
+            }
+            else if ( fSimPDG >= -9999 && fSimPDG <= -1000  ) // kPdgAntiBaryon except proton and neutron, antihyperon
+            {
+              fSim_HadE += particle.E()-particle.Mass() + 2*particle.Mass() + ( particle.Mass() - proton_mass );
+            }
+            else if (fSimPDG == 22) // kPdgGamma
+            {
+              fSim_HadE += particle.E();
+            }
         }
 
         if ( particle.Process() == "primary" ) {
@@ -875,6 +985,9 @@ namespace lar {
                 fSim_mu_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
                 fSim_mu_Edep_a2 += energyDeposit.energy;
               }
+              else{
+                fSim_mu_Edep_NonCollectionPlane_a2 += energyDeposit.energy;
+              }
               // Method b
               std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
               if ( Wires[0].planeID().Plane == 0 )
@@ -882,6 +995,9 @@ namespace lar {
                 fSim_mu_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
                 fSim_mu_Edep_b2 += energyDeposit.energy;
               } // end if access plane info via channel -> wire -> plane ID is 0
+              else{
+                fSim_mu_Edep_NonCollectionPlane_b2 += energyDeposit.energy;
+              }
 
             }// end muon energy deposit
             else
@@ -905,6 +1021,9 @@ namespace lar {
                 fSim_hadronic_hit_Edep_a1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
                 fSim_hadronic_hit_Edep_a2.push_back(energyDeposit.energy);
               } // end if access plane info via channel signal type
+              else{
+                fSim_hadronic_Edep_NonCollectionPlane_a2 += energyDeposit.energy;
+              }
 
               //
               // Method b: navigate via channel -> wire -> plane ID, and require planeID to be 0.
@@ -923,10 +1042,71 @@ namespace lar {
                 fSim_hadronic_hit_Edep_b1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
                 fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
               } // end if access plane info via channel -> wire -> plane ID is 0
-
+              else{
+                fSim_hadronic_Edep_NonCollectionPlane_b2 += energyDeposit.energy;
+              }
 
             } // end if hadronic
           }   // end For each energy deposit
+
+          // Debug energyDeposit
+          // all EM shower are treated as secondary interactions, and their particles are not saved in the MC particle list
+          for ( auto const& energyDeposit : energyDeposits ) {
+
+            // Method a
+            if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
+            {
+              // Still do the search, but now only for primary lepton
+              auto search = particleMap.find( energyDeposit.trackID );
+
+              if ( search != particleMap.end() ) { // found match in map
+
+                const simb::MCParticle& particle = *((*search).second);
+
+                // if it's primary lepton
+                if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
+                {
+                   fSim_mu_Edep_a2_debug += energyDeposit.energy;
+                   // now continue to the next energy deposit
+                   continue;
+                } // end if it's primary lepton
+
+                // if it's not a primary lepton, do nothing
+            }// end found match
+
+            // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
+            fSim_hadronic_Edep_a2_debug += energyDeposit.energy;
+          } // end method a
+
+            // Method b: First check if it's on collection plane
+            std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
+            if ( Wires[0].planeID().Plane == 0 ) {
+
+              // Still do the search, but now only for primary lepton
+              auto search = particleMap.find( energyDeposit.trackID );
+
+              if ( search != particleMap.end() ) { // found match in map
+
+                const simb::MCParticle& particle = *((*search).second);
+
+                // if it's primary lepton
+                if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
+                {
+                   fSim_mu_Edep_b2_debug += energyDeposit.energy;
+                   // now continue to the next energy deposit
+                   continue;
+                } // end if it's primary lepton
+
+                // if it's not a primary lepton, do nothing
+
+              } // end found match
+
+              // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
+              fSim_hadronic_Edep_b2_debug += energyDeposit.energy;
+
+            } // end plane == 0
+          } // end energy deposit loop
+
         }     // end For each time slice
       }       // end For each SimChannel
 
