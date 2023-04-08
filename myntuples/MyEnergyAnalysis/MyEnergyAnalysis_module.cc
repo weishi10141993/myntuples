@@ -151,6 +151,7 @@ namespace lar {
       //
       int fSimPDG;                       // MCParticle PDG ID
       std::vector<int> fSimP_TrackID_vec;
+      std::vector<int> EDep_TrackID_vec;
       std::vector<int> fSimP_PDG_vec;
       std::vector<int> fSimP_Mom_vec;
       std::vector<int> fSimP_SC_vec;
@@ -166,6 +167,8 @@ namespace lar {
       std::vector<float> fSimP_Ek_vec;
 
       int fSimTrackID;                   // GEANT ID of the particle being processed
+      int EDepTrackID;
+      int primarylep_trkID;
       int fSim_nEle;                     // No. of Sim electrons (e+/e-)
       int fSim_nNue;                     // No. of Sim electron neutrinos (nue and nuebar)
       int fSim_nMu;                      // No. of Sim muons (mu+/mu-)
@@ -547,6 +550,7 @@ namespace lar {
       fP_Ek.clear();
 
       fSimP_TrackID_vec.clear();
+      EDep_TrackID_vec.clear();
       fSimP_PDG_vec.clear();
       fSimP_Mom_vec.clear();
       fSimP_SC_vec.clear();
@@ -782,6 +786,8 @@ namespace lar {
 
       // Create a map pf MCParticle to its track ID, to be used for hadronic part later
       std::map<int, const simb::MCParticle*> particleMap;
+      // Create a map of energy deposits to its track ID
+      std::map<int, double> EDepMap;
 
       //
       // Process Sim MCparticles info
@@ -834,7 +840,11 @@ namespace lar {
         fSimP_M_vec.push_back(particle.Mass());
         fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
 
-
+        // Take note of primary lepton track id, to be used later
+        if ( particle.Process() == "primary" && ( abs(fSimPDG) == 13 || abs(fSimPDG) == 11 || abs(fSimPDG) == 15 ) ) {
+          primarylep_trkID = fSimTrackID;
+          if (false) std::cout << "primarylep_trkID: " << primarylep_trkID << std::endl; // the primary lep should always have trk id = 1
+        }
 
         // Calculate sim_lepE and sim_hadE
         if ( particle.StatusCode() == 1 )
@@ -1066,52 +1076,74 @@ namespace lar {
                 // if it's primary lepton
                 if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
                 {
-                   fSim_mu_Edep_a2_debug += energyDeposit.energy;
-                   // now continue to the next energy deposit
-                   continue;
+                  fSim_mu_Edep_a2_debug += energyDeposit.energy;
+                  // now continue to the next energy deposit
+                  continue;
                 } // end if it's primary lepton
 
                 // if it's not a primary lepton, do nothing
-            }// end found match
+              }// end found match
 
-            // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
-            fSim_hadronic_Edep_a2_debug += energyDeposit.energy;
-          } // end method a
+              // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
+              fSim_hadronic_Edep_a2_debug += energyDeposit.energy;
+            } // end method a
 
             // Method b: First check if it's on collection plane
             std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
             if ( Wires[0].planeID().Plane == 0 ) {
 
-              // Still do the search, but now only for primary lepton
-              auto search = particleMap.find( energyDeposit.trackID );
+              // Still do the search, but now only for primary lepton (particleMap trkID is always positive)
+              // Also search for EM shower particles from primary lepton, these deposits has trkID that's negative of the primary lepton trkID
+              auto search = particleMap.find( abs(energyDeposit.trackID) );
+
 
               if ( search != particleMap.end() ) { // found match in map
 
                 const simb::MCParticle& particle = *((*search).second);
-
-                // if it's primary lepton
-                if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
+                // if the energy deposit is from primary lepton,
+                // or its mother particle is the primary lepton (e.g., from muon decays)
+                // it's funny muon decays but still has status code 1
+                if ( ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ) ) || particle.Mother() == primarylep_trkID )
                 {
-                   fSim_mu_Edep_b2_debug += energyDeposit.energy;
-                   // now continue to the next energy deposit
-                   continue;
-                } // end if it's primary lepton
-
-                // if it's not a primary lepton, do nothing
-
+                  fSim_mu_Edep_b2_debug += energyDeposit.energy;
+                  // now continue to the next energy deposit
+                  continue;
+                } // end lepton dep e
+                // if it's not, do nothing
               } // end found match
 
-              // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
+              // If the energyDeposit made this far, it's counted as hadronic deposits (primary+secondary), do not involve particleMap
               fSim_hadronic_Edep_b2_debug += energyDeposit.energy;
+
+              // Store trackID for debug
+              EDepTrackID = energyDeposit.trackID;
+              auto exist = EDepMap.find( EDepTrackID );
+              // if can't find, store it and add the edep
+              if ( exist == EDepMap.end() ) {
+                EDep_TrackID_vec.push_back( EDepTrackID ); // negative trackID exists
+                EDepMap[EDepTrackID] = energyDeposit.energy;
+              } else { // find the same track id
+                EDepMap[EDepTrackID] += energyDeposit.energy;
+              }
 
             } // end plane == 0
           } // end energy deposit loop
-
-        }     // end For each time slice
-      }       // end For each SimChannel
+        } // end For each time slice
+      } // end For each SimChannel
 
       fSim_n_hadronic_Edep_a = fSim_hadronic_hit_x_a.size();
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
+
+      // Print out EDepMap
+      if ( false ) std::cout << "fGen_numu_E: "<< fGen_numu_E << ", fSim_mu_Edep_b2_debug: " << fSim_mu_Edep_b2_debug<< ", fSim_hadronic_Edep_b2_debug: " << fSim_hadronic_Edep_b2_debug << ", Tot had E track id: " << EDep_TrackID_vec.size() << std::endl;
+      if ( false ) {
+        for (long unsigned int i=0; i< EDep_TrackID_vec.size(); i++) {
+          std::cout << "Evt track id: " << EDep_TrackID_vec.at(i) << std::endl;
+        }
+        std::map<int, double>::iterator it;
+        std::cout << "TrackID" << " | " << "Tot EDep" << std::endl;
+        for (it = EDepMap.begin(); it != EDepMap.end(); it++) std::cout << "    " << it->first << " | " << it->second << std::endl;
+      }
 
       // In general, objects in the LArSoft reconstruction chain are linked using the art::Assns class:
       // <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Using_art_in_LArSoft#artAssns>
