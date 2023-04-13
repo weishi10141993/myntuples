@@ -59,6 +59,8 @@ namespace {
   // Sort MC particles based on its start momentum P(0)
   bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
 
+  // Ancestor Mother is primary lepton
+  bool IsAncestorMotherPrimaryLep(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
 
 } // local namespace
 
@@ -1101,9 +1103,8 @@ namespace lar {
 
                 const simb::MCParticle& particle = *((*search).second);
                 // if the energy deposit is from primary lepton,
-                // or its mother particle is the primary lepton (e.g., from muon decays)
-                // it's funny muon decays but still has status code 1
-                if ( ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ) ) || particle.Mother() == primarylep_trkID )
+                // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
+                if ( ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ) ) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap) )
                 {
                   fSim_mu_Edep_b2_debug += energyDeposit.energy;
                   // now continue to the next energy deposit
@@ -1188,5 +1189,20 @@ namespace {
   bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
     return ( p1->P(0) > p2->P(0) );
   }
+
+  // If this returns true, then the energy deposit is associated with primary lepton
+  bool IsAncestorMotherPrimaryLep(const simb::MCParticle& p1, int primarylep_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the primary lep
+    if ( MothertrkID == primarylep_trkID )  return true;
+    // Immediate mother is not primary lep, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherPrimaryLep(tmp_mother, primarylep_trkID, particleMap);
+    }
+  } // end GetAncestorMotherTrkID
 
 } // local namespace
