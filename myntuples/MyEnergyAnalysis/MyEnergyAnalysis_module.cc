@@ -62,6 +62,22 @@ namespace {
   // Ancestor Mother is primary lepton
   bool IsAncestorMotherPrimaryLep(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
 
+  //Ancestor Mother is Neutron
+  bool IsAncestorMotherNeutron(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
+
+  //Ancestor Mother is Proton
+  bool IsAncestorMotherProton(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
+
+  //Ancestor Mother is Pi+
+  bool IsAncestorMotherPip(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
+
+  //Ancestor Mother is Pi-
+  bool IsAncestorMotherPim(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
+
+  //Ancestor Mother is pi0
+  bool IsAncestorMotherPi0(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
+
+
 } // local namespace
 
 // An outside package call this module like lar::example::MyEnergyAnalysis
@@ -145,7 +161,7 @@ namespace lar {
 
       // Add true nu information
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
-      int nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
+      int nLep, nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
       double E_vis_true;                 // True vis energy [GeV]
 
       //
@@ -170,7 +186,16 @@ namespace lar {
 
       int fSimTrackID;                   // GEANT ID of the particle being processed
       int EDepTrackID;
+
       int primarylep_trkID;
+      int neutron_trkID;
+      int proton_trkID;
+      int pip_trkID;
+      int pim_trkID;
+      int pi0_trkID;
+      // Next is to code it in vectors
+      // std::vector<int> pi0_trkID;
+
       int fSim_nEle;                     // No. of Sim electrons (e+/e-)
       int fSim_nNue;                     // No. of Sim electron neutrinos (nue and nuebar)
       int fSim_nMu;                      // No. of Sim muons (mu+/mu-)
@@ -199,8 +224,6 @@ namespace lar {
       int fStatusCode;                    // Generator level neutrino lepton statuscode
       double fLepNuAngle;                // Angle b/w nu and lepton
 
-
-
       double fGen_numu_E;                // Energy of generator level neutrino [GeV]
       double fSim_numu_E;                // Energy of leading muon (anti) neutrino
       double fSim_mu_start_vx;           // x position of the muon trajectory start
@@ -223,32 +246,16 @@ namespace lar {
       double fSim_mu_end_4mommenta[4];   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
 
-      /*
-      double fSim_mu_Edep_a1;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
-      double fSim_mu_Edep_a2;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
-      double fSim_mu_Edep_NonCollectionPlane_a2; // [MeV]
-      double fSim_mu_Edep_a2_debug;          // [MeV]
-      double fSim_mu_Edep_b2_debug;          // [MeV]
-      double fSim_mu_Edep_b1;                // [GeV]
-      double fSim_mu_Edep_NonCollectionPlane_b2; // [MeV]
-      */
       double fSim_mu_Edep_b2;                // [MeV]
+      double fSim_n_Edep_b2;                // [MeV] Energy Deposit of neutron
+      double fSim_p_Edep_b2;                // [MeV] Energy Deposit of proton
+      double fSim_pip_Edep_b2;                // [MeV] Energy Deposity of Pion+
+      double fSim_pim_Edep_b2;                // [MeV] Energy Deposity of Pion-
+      double fSim_pi0_Edep_b2;                // [MeV] Energy Deposity of Pion0
+      double fSim_Other_Edep_b2;                // [MeV] Energy Deposity of eOther ; includes kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
 
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
-      /*
-      // Method a
-      double fSim_hadronic_Edep_a1;      // total amount of electrons reaching the readout channel [GeV]
-      double fSim_hadronic_Edep_a2;      // total amount of energy released by ionizations in the event (from Geant4 simulation) [MeV]
-      double fSim_hadronic_Edep_NonCollectionPlane_a2;  // [MeV]
-      double fSim_hadronic_Edep_a2_debug;          // [MeV]
-      int fSim_n_hadronic_Edep_a;        // Number of hadronic energy deposits
-      std::vector<float> fSim_hadronic_hit_x_a;      // Store position x for each energy deposit
-      std::vector<float> fSim_hadronic_hit_y_a;
-      std::vector<float> fSim_hadronic_hit_z_a;
-      std::vector<float> fSim_hadronic_hit_Edep_a1;
-      std::vector<float> fSim_hadronic_hit_Edep_a2;
-      */
       // Method b
       //double fSim_hadronic_Edep_b1;
       double fSim_hadronic_Edep_b2;
@@ -343,6 +350,7 @@ namespace lar {
       fNtuple->Branch("ePim",          &ePim,          "ePim/D");
       fNtuple->Branch("ePi0",          &ePi0,          "ePi0/D");
       fNtuple->Branch("eOther",        &eOther,        "eOther/D");
+      fNtuple->Branch("nLep",          &nLep,           "nLep/I");
       fNtuple->Branch("nP",            &nP,            "nP/I");
       fNtuple->Branch("nN",            &nN,            "nN/I");
       fNtuple->Branch("nPip",          &nPip,          "nPip/I");
@@ -425,31 +433,13 @@ namespace lar {
       fNtuple->Branch("Sim_mu_end_4mommenta",      fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
       fNtuple->Branch("Sim_mu_track_length",      &fSim_mu_track_length,    "Sim_mu_track_length/D");
       fNtuple->Branch("Sim_mu_Edep_b2",           &fSim_mu_Edep_b2,         "Sim_mu_Edep_b2/D");
-      /*
-      fNtuple->Branch("Sim_mu_Edep_a1",           &fSim_mu_Edep_a1,            "Sim_mu_Edep_a1/D");
-      fNtuple->Branch("Sim_mu_Edep_a2",           &fSim_mu_Edep_a2,            "Sim_mu_Edep_a2/D");
-      fNtuple->Branch("Sim_mu_Edep_NonCollectionPlane_a2",           &fSim_mu_Edep_NonCollectionPlane_a2,            "fSim_mu_Edep_NonCollectionPlane_a2/D");
-      fNtuple->Branch("Sim_mu_Edep_b1",           &fSim_mu_Edep_b1,            "Sim_mu_Edep_b1/D");
-      fNtuple->Branch("Sim_mu_Edep_NonCollectionPlane_b2",           &fSim_mu_Edep_NonCollectionPlane_b2,            "fSim_mu_Edep_NonCollectionPlane_b2/D");
-      fNtuple->Branch("Sim_mu_Edep_a2_debug",           &fSim_mu_Edep_a2_debug,            "fSim_mu_Edep_a2_debug/D");
-      fNtuple->Branch("Sim_mu_Edep_b2_debug",           &fSim_mu_Edep_b2_debug,            "fSim_mu_Edep_b2_debug/D");
 
-      fNtuple->Branch("Sim_hadronic_Edep_a1",     &fSim_hadronic_Edep_a1,   "Sim_hadronic_Edep_a1/D");
-      fNtuple->Branch("Sim_hadronic_Edep_a2",     &fSim_hadronic_Edep_a2,   "Sim_hadronic_Edep_a2/D");
-      fNtuple->Branch("Sim_hadronic_Edep_NonCollectionPlane_a2",     &fSim_hadronic_Edep_NonCollectionPlane_a2,   "Sim_hadronic_Edep_NonCollectionPlane_a2/D");
-      fNtuple->Branch("Sim_n_hadronic_Edep_a",    &fSim_n_hadronic_Edep_a,  "Sim_n_hadronic_Edep_a/I");
-      fNtuple->Branch("Sim_hadronic_hit_x_a",     &fSim_hadronic_hit_x_a);
-      fNtuple->Branch("Sim_hadronic_hit_y_a",     &fSim_hadronic_hit_y_a);
-      fNtuple->Branch("Sim_hadronic_hit_z_a",     &fSim_hadronic_hit_z_a);
-      fNtuple->Branch("Sim_hadronic_hit_Edep_a1", &fSim_hadronic_hit_Edep_a1);
-      fNtuple->Branch("Sim_hadronic_hit_Edep_a2", &fSim_hadronic_hit_Edep_a2);
-
-      fNtuple->Branch("Sim_hadronic_Edep_NonCollectionPlane_b2",     &fSim_hadronic_Edep_NonCollectionPlane_b2,   "Sim_hadronic_Edep_NonCollectionPlane_b2/D");
-      fNtuple->Branch("Sim_hadronic_Edep_a2_debug",     &fSim_hadronic_Edep_a2_debug,   "Sim_hadronic_Edep_a2_debug/D");
-      fNtuple->Branch("Sim_hadronic_Edep_b2_debug",     &fSim_hadronic_Edep_b2_debug,   "Sim_hadronic_Edep_b2_debug/D");
-      fNtuple->Branch("Sim_hadronic_hit_Edep_b1", &fSim_hadronic_hit_Edep_b1);
-      fNtuple->Branch("Sim_hadronic_Edep_b1",     &fSim_hadronic_Edep_b1,   "Sim_hadronic_Edep_b1/D");
-      */
+      fNtuple->Branch("Sim_n_Edep_b2",            &fSim_n_Edep_b2,          "Sim_n_Edep_b2/D");
+      fNtuple->Branch("Sim_p_Edep_b2",            &fSim_p_Edep_b2,          "Sim_p_Edep_b2/D");
+      fNtuple->Branch("Sim_pip_Edep_b2",          &fSim_pip_Edep_b2,        "Sim_pip_Edep_b2/D");
+      fNtuple->Branch("Sim_pim_Edep_b2",          &fSim_pim_Edep_b2,        "Sim_pim_Edep_b2/D");
+      fNtuple->Branch("Sim_pi0_Edep_b2",          &fSim_pi0_Edep_b2,        "Sim_pi0_Edep_b2/D");
+      fNtuple->Branch("Sim_Other_Edep_b2",        &fSim_Other_Edep_b2,      "Sim_Other_Edep_b2/D");
 
       fNtuple->Branch("Sim_hadronic_Edep_b2",     &fSim_hadronic_Edep_b2,   "Sim_hadronic_Edep_b2/D");
       fNtuple->Branch("Sim_n_hadronic_Edep_b",    &fSim_n_hadronic_Edep_b,  "Sim_n_hadronic_Edep_b/I");
@@ -527,6 +517,17 @@ namespace lar {
       fSim_LepE                  = 0.;
       fSim_HadE                  = 0.;
 
+      // Important to initialize as negative number as normal trkid or mother particle track id are non negative
+      // The smallest mother track id is 0
+      primarylep_trkID           = -1;
+      neutron_trkID              = -1;
+      proton_trkID               = -1;
+      pip_trkID                  = -1;
+      pim_trkID                  = -1;
+      pi0_trkID                  = -1;
+      // if pi0_trkID is a vector, initilize all elements as -1
+      //pi0_trkID.clear();
+
       // Initialize true info
       fLepNuAngle = -9999.;
       fLepMomX    = -9999.;
@@ -570,25 +571,13 @@ namespace lar {
       fSimP_M_vec.clear();
       fSimP_Ek_vec.clear();
 
-
-      // Initialize mu deposit energy
-      /*
-      fSim_mu_Edep_a1 = 0.;                // muon energy deposit [GeV]: total amount of electrons reaching the readout channel
-      fSim_mu_Edep_a2 = 0.;                // muon energy deposit [MeV]: total amount of energy released by ionizations in the event (from Geant4 simulation)
-      fSim_mu_Edep_NonCollectionPlane_a2 = 0.;
-      fSim_mu_Edep_b1 = 0.;
-      fSim_mu_Edep_NonCollectionPlane_b2 = 0.;
-      fSim_mu_Edep_a2_debug = 0.;
-      fSim_mu_Edep_b2_debug = 0.;
-      fSim_hadronic_Edep_a1      = 0.; // This initilization is necessary
-      fSim_hadronic_Edep_a2      = 0.;
-      fSim_hadronic_Edep_NonCollectionPlane_a2 = 0.;
-      fSim_hadronic_Edep_b1      = 0.;
-      fSim_hadronic_Edep_NonCollectionPlane_b2 = 0.;
-      fSim_hadronic_Edep_a2_debug = 0.;
-      fSim_hadronic_Edep_b2_debug = 0.;
-      */
       fSim_mu_Edep_b2        = 0.;
+      fSim_n_Edep_b2         = 0.;
+      fSim_p_Edep_b2         = 0.;
+      fSim_pip_Edep_b2       = 0.;
+      fSim_pim_Edep_b2       = 0.;
+      fSim_pi0_Edep_b2       = 0.;
+      fSim_Other_Edep_b2     = 0.;
       fSim_hadronic_Edep_b2  = 0.;
 
       for (int i = 0; i < 4; i++) {
@@ -597,15 +586,7 @@ namespace lar {
         fSim_mu_start_4mommenta[i] = -9999.;
         fSim_mu_end_4mommenta[i]   = -9999.;
       }
-      /*
-      fSim_hadronic_hit_x_a.clear();
-      fSim_hadronic_hit_y_a.clear();
-      fSim_hadronic_hit_z_a.clear();
-      fSim_hadronic_hit_Edep_a1.clear();
-      fSim_hadronic_hit_Edep_a2.clear();
 
-      fSim_hadronic_hit_Edep_b1.clear();
-      */
       fSim_hadronic_hit_x_b.clear();
       fSim_hadronic_hit_y_b.clear();
       fSim_hadronic_hit_z_b.clear();
@@ -661,6 +642,7 @@ namespace lar {
       ePi0 = 0.;
       eOther = 0.;
 
+      nLep = 0;
       nP = 0;
       nN = 0;
       nPip = 0;
@@ -704,7 +686,7 @@ namespace lar {
           if ( fP_StatusCode.at(p) == 1 ) // Stable Final State
           {
 
-            // Claculate true Lep E
+            // Calculate true Lep E
             if ( abs(fP_PDG.at(p)) == 13 )
             {
               fTrue_LepE += fP_E.at(p);
@@ -731,8 +713,10 @@ namespace lar {
               fTrue_HadE += fP_E.at(p);
             }
 
-
-
+            if ( abs(fP_PDG.at(p)) == 13 ) // kPdgMuon
+            {
+              nLep++;
+            }
             if ( fP_PDG.at(p) == 2212 ) // kPdgProton
             {
               eP += fP_Ek.at(p);
@@ -840,10 +824,46 @@ namespace lar {
         fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
 
         // Take note of primary lepton track id, to be used later
-        if ( particle.Process() == "primary" && ( abs(fSimPDG) == 13 || abs(fSimPDG) == 11 || abs(fSimPDG) == 15 ) ) {
+        if ( particle.Process() == "primary" && abs(fSimPDG) == 13 ) {
           primarylep_trkID = fSimTrackID;
           if (false) std::cout << "primarylep_trkID: " << primarylep_trkID << std::endl; // the primary lep should always have trk id = 1
         }
+
+        //Take note of neutron trackID
+        if ( fSimPDG == 2112){
+          neutron_trkID = fSimTrackID;
+          //std::cout << "neutron_trkID: " << neutron_trkID << std::endl;
+        }
+
+        //Take note of proton trackID
+        if ( fSimPDG == 2212){
+          proton_trkID = fSimTrackID;
+          //std::cout << "proton_trkID: " << proton_trkID << std::endl;
+        }
+
+        // Take note of pip track ID
+        if ( fSimPDG == 211 ) {
+          pip_trkID = fSimTrackID;
+          //std::cout << "pip_trkID: " << pip_trkID << std::endl;
+        }
+
+        // Take note of primary pim track ID
+        if ( fSimPDG == -211 ) {
+          pim_trkID = fSimTrackID;
+          //std::cout << "pim_trkID: " << pim_trkID << std::endl;
+        }
+
+        // Take note of primary pi0 track ID
+        if ( fSimPDG == 111 ) {
+          pi0_trkID = fSimTrackID;
+          // Could add an counter here to see how many pi0 in the event. If no pi0s, when calculate energy deposit later you don't need to check pi0 at all
+
+          //std::cout << "pi0_trkID: " << pi0_trkID << ", E: " << particle.E() << ", mass: " << particle.Mass() << std::endl;
+        }
+
+        //if ( fSimPDG == 22 && particle.Mother() == pi0_trkID) {
+          //std::cout << "gamma: Mother trkid: " << pi0_trkID << ", E: " << particle.E() << ", mass: " << particle.Mass() << std::endl;
+        //}
 
         // Calculate sim_lepE and sim_hadE
         if ( particle.StatusCode() == 1 )
@@ -873,7 +893,7 @@ namespace lar {
             }
         }
 
-        if ( particle.Process() == "primary" ) {
+        //if ( particle.Process() == "primary" ) {
           if ( abs(fSimPDG) == 11 )   SimElectrons.push_back(&particle);
           if ( abs(fSimPDG) == 12 )   SimNues.push_back(&particle);
           if ( abs(fSimPDG) == 13 )   SimMuons.push_back(&particle);
@@ -885,7 +905,7 @@ namespace lar {
           if ( abs(fSimPDG) == 211 )  SimChargedPions.push_back(&particle);
           if ( abs(fSimPDG) == 2112 ) SimNeutrons.push_back(&particle);
           if ( abs(fSimPDG) == 2212 ) SimProtons.push_back(&particle);
-        }
+        //}
 
       } // end loop over all particles in the event.
 
@@ -973,119 +993,8 @@ namespace lar {
           // For the timeSlices map, the 'first' is a time slice number; The 'second' is a vector of IDE objects.
           auto const& energyDeposits = timeSlice.second;
 
-          // An "energy deposit" object stores how much charge/energy was deposited in a small volume, by which particle, and where.
-          // The type of 'energyDeposit' will be sim::IDE, here use auto.
-          /*
-          for ( auto const& energyDeposit : energyDeposits )
-          {
-
-            auto search = particleMap.find( energyDeposit.trackID );
-            if ( search == particleMap.end() ) continue;
-
-            // "search" points to a pair in the map: <track ID, MCParticle*>
-            const simb::MCParticle& particle = *((*search).second);
-
-            // Deposit energy for lepton
-            if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
-             // if ( abs(particle.PdgCode()) == 13)
-            {
-              // Method a
-              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
-              {
-                fSim_mu_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
-                fSim_mu_Edep_a2 += energyDeposit.energy;
-              }
-              else{
-                fSim_mu_Edep_NonCollectionPlane_a2 += energyDeposit.energy;
-              }
-              // Method b
-              std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-              if ( Wires[0].planeID().Plane == 0 )
-              {
-                fSim_mu_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
-                fSim_mu_Edep_b2 += energyDeposit.energy;
-              } // end if access plane info via channel -> wire -> plane ID is 0
-              else{
-                fSim_mu_Edep_NonCollectionPlane_b2 += energyDeposit.energy;
-              }
-
-            }// end muon energy deposit
-            else
-            {
-              // If it's not from primary leptons, count it as hadronic
-              // Method a: only include the energy from the collection plane: geo::kCollection defined in
-              // ${LARCOREOBJ_INC}/larcoreobj/SimpleTypesAndConstants/geo_types.h
-              //
-              if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
-              {
-                //
-                // Note: there are also two ways to get E deposit for sim::IDE
-                //
-                fSim_hadronic_Edep_a1 += energyDeposit.numElectrons * fElectronsToGeV;
-                fSim_hadronic_Edep_a2 += energyDeposit.energy;
-
-                // Store position and E for each deposit
-                fSim_hadronic_hit_x_a.push_back(energyDeposit.x);
-                fSim_hadronic_hit_y_a.push_back(energyDeposit.y);
-                fSim_hadronic_hit_z_a.push_back(energyDeposit.z);
-                fSim_hadronic_hit_Edep_a1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
-                fSim_hadronic_hit_Edep_a2.push_back(energyDeposit.energy);
-              } // end if access plane info via channel signal type
-              else{
-                fSim_hadronic_Edep_NonCollectionPlane_a2 += energyDeposit.energy;
-              }
-
-              //
-              // Method b: navigate via channel -> wire -> plane ID, and require planeID to be 0.
-              //
-              std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-              if ( Wires[0].planeID().Plane == 0 )
-              {
-
-                fSim_hadronic_Edep_b1 += energyDeposit.numElectrons * fElectronsToGeV;
-                fSim_hadronic_Edep_b2 += energyDeposit.energy;
-
-                // Store position and E for each deposit
-                fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
-                fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
-                fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
-                fSim_hadronic_hit_Edep_b1.push_back(energyDeposit.numElectrons * fElectronsToGeV);
-                fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
-              } // end if access plane info via channel -> wire -> plane ID is 0
-              else{
-                fSim_hadronic_Edep_NonCollectionPlane_b2 += energyDeposit.energy;
-              }
-
-            } // end if hadronic
-          }   // end For each energy deposit
-          */
           for ( auto const& energyDeposit : energyDeposits ) {
-            /*
-            // Method a
-            if ( fGeometryService->SignalType(channelNumber) == geo::kCollection )
-            {
-              // Still do the search, but now only for primary lepton
-              auto search = particleMap.find( energyDeposit.trackID );
 
-              if ( search != particleMap.end() ) { // found match in map
-
-                const simb::MCParticle& particle = *((*search).second);
-
-                // if it's primary lepton
-                if ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ))
-                {
-                  fSim_mu_Edep_a2_debug += energyDeposit.energy;
-                  // now continue to the next energy deposit
-                  continue;
-                } // end if it's primary lepton
-
-                // if it's not a primary lepton, do nothing
-              }// end found match
-
-              // If the energyDeposit made this far, count it as hadronic deposits (primary+secondary), do not involve particleMap
-              fSim_hadronic_Edep_a2_debug += energyDeposit.energy;
-            } // end method a
-            */
             // Method b: First check if it's on collection plane
             std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
             if ( Wires[0].planeID().Plane == 0 ) {
@@ -1101,15 +1010,40 @@ namespace lar {
                 const simb::MCParticle& particle = *((*search).second);
                 // if the energy deposit is from primary lepton,
                 // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
-                if ( ( particle.Process() == "primary" && ( abs(particle.PdgCode()) == 13 || abs(particle.PdgCode()) == 11 || abs(particle.PdgCode()) == 15 ) ) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap) )
-                {
+                if ( ( particle.Process() == "primary" && abs(particle.PdgCode()) == 13 ) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap) ) {
                   fSim_mu_Edep_b2 += energyDeposit.energy;
                   // now continue to the next energy deposit
+                  // continue here to avoid counting into fSim_hadronic_Edep_b2
                   continue;
-                } // end lepton dep e
-                // if it's not, do nothing
+                } // end lepton deposited energy
+
+                //if ( particle.PdgCode() == 22 && particle.Mother() == pi0_trkID ) {
+                  //std::cout << "EDep MeV: "<< energyDeposit.energy << " from gamma: Mother trkid: " << pi0_trkID << ", E: " << particle.E() << ", mass: " << particle.Mass() << std::endl;
+                //}
+
+                // if the energy deposit is from neutron
+                // or its ancestor mother particle is the neutron
+                if      ( particle.PdgCode() == 2112 || IsAncestorMotherNeutron(particle, neutron_trkID, particleMap) ) { fSim_n_Edep_b2 += energyDeposit.energy; } //std::cout << "fire n! " << std::endl;  // end neutron deposited energy
+                // if the energy deposit is from proton
+                // or its ancestor mother particle is the proton
+                else if ( particle.PdgCode() == 2212 || IsAncestorMotherProton(particle, proton_trkID, particleMap) )   { fSim_p_Edep_b2 += energyDeposit.energy; } //std::cout << "fire p! " << std::endl;  // end proton deposited energy
+                // if the energy deposit is from primary pip
+                // or its ancestor mother particle is the pip
+                else if ( particle.PdgCode() == 211  || IsAncestorMotherPip(particle, pip_trkID, particleMap) )         { fSim_pip_Edep_b2 += energyDeposit.energy; } // std::cout << "fire pip! pdg: "<< particle.PdgCode() << ", pip_trkID: " << pip_trkID << ", IsAncestorMotherPip: " << IsAncestorMotherPip(particle, pip_trkID, particleMap) << std::endl; } // end pip deposited energy
+                // if the energy deposit is from primary pim
+                // or its ancestor mother particle is the pim (pi0 decays into two photons)
+                else if ( particle.PdgCode() == -211 || IsAncestorMotherPim(particle, pim_trkID, particleMap) )         { fSim_pim_Edep_b2 += energyDeposit.energy; } //std::cout << "fire pim! " << std::endl; } // end pim deposited energy
+                // if the energy deposit is from primary pi0
+                // or its ancestor mother particle is the pi0 (pi0 decays into two photons)
+                else if ( particle.PdgCode() == 111  || IsAncestorMotherPi0(particle, pi0_trkID, particleMap) )         { fSim_pi0_Edep_b2 += energyDeposit.energy; } //std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
+                else if ( particle.PdgCode() == 321  || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) //eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
+                {
+                  fSim_Other_Edep_b2 += energyDeposit.energy;
+                  //std::cout << "fire Other! " << std::endl;
+                }
               } // end found match
 
+              // if it's not, count as hadronic
               // If the energyDeposit made this far, it's counted as hadronic deposits (primary+secondary), do not involve particleMap
               fSim_hadronic_Edep_b2 += energyDeposit.energy;
               fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
@@ -1203,6 +1137,82 @@ namespace {
       const simb::MCParticle& tmp_mother = *((*tmp_search).second);
       return IsAncestorMotherPrimaryLep(tmp_mother, primarylep_trkID, particleMap);
     }
-  } // end GetAncestorMotherTrkID
+  } // end GetAncestorMotherLeptonTrkID
+
+    // If this returns true, then the energy deposit is associated with neutron
+  bool IsAncestorMotherNeutron(const simb::MCParticle& p1, int neutron_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the neutron
+    if ( MothertrkID == neutron_trkID )  return true;
+    // Immediate mother is not neutron, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherNeutron(tmp_mother, neutron_trkID, particleMap);
+    }
+  } // end GetAncestorMotherNeutronTrkID
+
+      // If this returns true, then the energy deposit is associated with proton
+  bool IsAncestorMotherProton(const simb::MCParticle& p1, int proton_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the neutron
+    if ( MothertrkID == proton_trkID )  return true;
+    // Immediate mother is not proton, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherProton(tmp_mother, proton_trkID, particleMap);
+    }
+  } // end GetAncestorMotherProtonTrkID
+
+    // If this returns true, then the energy deposit is associated with pion+
+  bool IsAncestorMotherPip(const simb::MCParticle& p1, int pip_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the pip
+    if ( MothertrkID == pip_trkID )  return true;
+    // Immediate mother is not pip, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherPip(tmp_mother, pip_trkID, particleMap);
+    }
+  } // end GetAncestorMotherPipTrkID
+
+  // If this returns true, then the energy deposit is associated with pion0
+  bool IsAncestorMotherPim(const simb::MCParticle& p1, int pim_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the pim
+    if ( MothertrkID == pim_trkID )  return true;
+    // Immediate mother is not pim, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherPim(tmp_mother, pim_trkID, particleMap);
+    }
+  } // end GetAncestorMotherPimTrkID
+
+
+  // If this returns true, then the energy deposit is associated with pion0
+  bool IsAncestorMotherPi0(const simb::MCParticle& p1, int pi0_trkID, std::map<int, const simb::MCParticle*> particleMap) {
+    int MothertrkID = p1.Mother();
+    // Immediate mother is the pi0
+    if ( MothertrkID == pi0_trkID )  return true;
+    // Immediate mother is not pi0, but other primary particles from genie
+    else if ( MothertrkID == 0 ) return false;
+    // Keep looking upstream, find it in particleMap
+    else {
+      auto tmp_search = particleMap.find( MothertrkID ); // this search must be found, can't be null
+      const simb::MCParticle& tmp_mother = *((*tmp_search).second);
+      return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
+    }
+  } // end GetAncestorMotherPi0TrkID
 
 } // local namespace
