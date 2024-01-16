@@ -758,8 +758,12 @@ namespace lar {
               ePi0 += fP_Ek.at(p);
               nPi0++;
             }
-            else if ( fP_PDG.at(p) == 321 || fP_PDG.at(p) == -321 || fP_PDG.at(p) == 311 || fP_PDG.at(p) == -311 || fP_PDG.at(p) == 130 || fP_PDG.at(p) == 310 || fP_PDG.at(p) == 22 || (fP_PDG.at(p)>=100 && fP_PDG.at(p)<=9999) || (fP_PDG.at(p)>=-9999 && fP_PDG.at(p)<=-100)) // kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
-            {
+            else if ( fP_PDG.at(p) == 321 || fP_PDG.at(p) == -321 || fP_PDG.at(p) == 311 || fP_PDG.at(p) == -311 || fP_PDG.at(p) == 130 || fP_PDG.at(p) == 310 || fP_PDG.at(p) == 22 ) {
+              eOther += fP_Ek.at(p);
+              nOther++;
+            }
+            else if ( fP_PDG.at(p) > 1000000000 ) {} // do nothing
+            else { // eOther same definition as ND legacy CAF, add Jan 16, 2024
               eOther += fP_Ek.at(p);
               nOther++;
             }
