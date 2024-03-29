@@ -46,6 +46,8 @@ The next time you login a DUNE FNAL machine (dunegpvm*), do the following to set
 
 ```
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+unsetup mrb
+setup mrb v4_04_06 
 setup dunetpc v09_22_02 -q e19:debug
 source /dune/app/users/weishi/FDEff/localProducts_larsoft_v09_22_02_debug_e19/setup
 mrbsetenv
